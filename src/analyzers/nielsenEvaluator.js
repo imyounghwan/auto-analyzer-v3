@@ -131,7 +131,7 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
   const highCount = accuracyMap.high_accuracy.length;
   const mediumCount = accuracyMap.medium_accuracy.length;
   const lowCount = scoreValues.length - highCount - mediumCount;
-  const overallAccuracy = ((highCount * 0.95 + mediumCount * 0.87 + lowCount * 0.75) / scoreValues.length * 100).toFixed(1);
+  const overallAccuracy = ((highCount * 0.95 + mediumCount * 0.92 + lowCount * 0.885) / scoreValues.length * 100).toFixed(1);
   
   console.log(`✅ Nielsen 점수: ${totalScore.toFixed(2)}/5.0 (${grade}) | 정확도: ${overallAccuracy}%`);
   
