@@ -20,6 +20,7 @@ program
   .option('-o, --output <path>', '출력 경로', './output')
   .option('--no-cache', '캐시 사용 안 함 (항상 새로 분석)')
   .option('--pdf', 'PDF 리포트 생성')
+  .option('-p, --pages <json>', '평가 대상 페이지 목록 (JSON 배열)')
   .action(async (options) => {
     try {
       console.log('\n' + '='.repeat(70));
@@ -27,6 +28,21 @@ program
       console.log('='.repeat(70));
       console.log(`📍 URL: ${options.url}`);
       console.log(`💾 캐시: ${options.cache ? '사용 (1시간)' : '사용 안 함'}`);
+      
+      // Parse pages parameter
+      let targetPages = [options.url];
+      if (options.pages) {
+        try {
+          const parsed = JSON.parse(options.pages);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            targetPages = parsed;
+            console.log(`📄 평가 대상 페이지: ${targetPages.length}개`);
+            targetPages.forEach((p, i) => console.log(`   ${i+1}. ${p}`));
+          }
+        } catch (e) {
+          console.warn('⚠️  pages 파라미터 파싱 실패, 메인 URL만 사용');
+        }
+      }
       console.log('');
       
       let result;
@@ -47,7 +63,7 @@ program
           fs.mkdirSync(options.output, { recursive: true });
         }
         
-        result = await runComprehensiveAnalysis(options.url);
+        result = await runComprehensiveAnalysis(options.url, targetPages);
         
         // 캐시 저장
         if (options.cache) {

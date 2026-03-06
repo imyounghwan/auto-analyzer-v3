@@ -27,7 +27,7 @@ app.get('/', (req, res) => {
 
 // API endpoint for analysis
 app.post('/api/analyze', (req, res) => {
-  const { url, pdf, noCache } = req.body;
+  const { url, pages, pdf, noCache } = req.body;
   
   if (!url) {
     return res.status(400).json({ success: false, error: 'URL is required' });
@@ -35,6 +35,16 @@ app.post('/api/analyze', (req, res) => {
 
   // Build command
   let command = `cd ${__dirname} && npm start -- analyze --url "${url}"`;
+  
+  // Add pages parameter if provided
+  if (pages && pages.length > 0) {
+    // pages 배열을 JSON으로 변환하여 전달
+    const pagesJson = JSON.stringify(pages).replace(/"/g, '\\"');
+    command += ` --pages '${pagesJson}'`;
+    console.log(`📄 평가 대상 페이지 ${pages.length}개:`);
+    pages.forEach((p, i) => console.log(`   ${i+1}. ${p}`));
+  }
+  
   if (pdf) command += ' --pdf';
   if (noCache) command += ' --no-cache';
 
