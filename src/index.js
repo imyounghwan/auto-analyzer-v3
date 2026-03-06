@@ -74,10 +74,9 @@ program
       console.log(`  보통(3.0+): ${result.summary.fairCount}개`);
       console.log(`  미흡(3.0-): ${result.summary.poorCount}개`);
       console.log('');
-      console.log('🎯 정확도 분석:');
-      console.log(`  Puppeteer 실측: ${result.summary.accuracyBreakdown.puppeteerMeasured}개 (95%+)`);
-      console.log(`  패턴 매칭: ${result.summary.accuracyBreakdown.patternMatched}개 (85-90%)`);
-      console.log(`  HTML 분석: ${result.summary.accuracyBreakdown.htmlOnly}개 (75-80%)`);
+      console.log('📊 측정 방식:');
+      console.log(`  실측 항목: ${result.summary.accuracyBreakdown.puppeteerMeasured + result.summary.accuracyBreakdown.patternMatched}개 (Puppeteer + Lighthouse)`);
+      console.log(`  추정 항목: ${result.summary.accuracyBreakdown.htmlOnly}개 (HTML 분석)`);
       console.log('');
       console.log(`📁 결과 저장: ${jsonPath}`);
       console.log('='.repeat(70) + '\n');
@@ -136,6 +135,10 @@ program
 // 명령어가 없으면 help 표시
 if (process.argv.length === 2) {
   program.help();
+}
+
+program.parse();
+m.help();
 }
 
 program.parse();

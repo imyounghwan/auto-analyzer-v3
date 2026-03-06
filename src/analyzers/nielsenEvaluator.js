@@ -127,13 +127,16 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
                 totalScore >= 3.5 ? 'B+' : 
                 totalScore >= 3.0 ? 'B' : 'C';
   
-  // 전체 정확도 추정
+  // 실측률 계산 (실제 측정한 항목의 비율)
   const highCount = accuracyMap.high_accuracy.length;
   const mediumCount = accuracyMap.medium_accuracy.length;
   const lowCount = scoreValues.length - highCount - mediumCount;
-  const overallAccuracy = ((highCount * 0.95 + mediumCount * 0.92 + lowCount * 0.885) / scoreValues.length * 100).toFixed(1);
   
-  console.log(`✅ Nielsen 점수: ${totalScore.toFixed(2)}/5.0 (${grade}) | 정확도: ${overallAccuracy}%`);
+  // 실측률 = 실제 측정 항목 / 전체 항목
+  const measuredCount = highCount + mediumCount;
+  const measuredRate = ((measuredCount / scoreValues.length) * 100).toFixed(1);
+  
+  console.log(`✅ Nielsen 점수: ${totalScore.toFixed(2)}/5.0 (${grade}) | 실측률: ${measuredRate}% (${measuredCount}/${scoreValues.length})`);
   
   return {
     scores,
@@ -145,7 +148,7 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
       goodCount: scoreValues.filter(s => s >= 4.0 && s < 4.5).length,
       fairCount: scoreValues.filter(s => s >= 3.0 && s < 4.0).length,
       poorCount: scoreValues.filter(s => s < 3.0).length,
-      overallAccuracy: `${overallAccuracy}%`,
+      overallMeasuredRate: `${measuredRate}%`,
       accuracyBreakdown: {
         puppeteerMeasured: highCount,
         patternMatched: mediumCount,
