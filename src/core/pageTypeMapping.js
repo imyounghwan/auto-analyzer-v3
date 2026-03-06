@@ -140,8 +140,25 @@ export function getItemsForPageType(pageType) {
 /**
  * 모든 페이지의 결과를 통합
  * 같은 항목이 여러 페이지에서 측정된 경우 평균 사용
+ * 
+ * ⚠️ 중요: 모든 페이지는 같은 사이트여야 함!
  */
 export function mergePageResults(pageResults) {
+  // 도메인 검증
+  const domains = pageResults.map(r => {
+    try {
+      return new URL(r.pageUrl).hostname;
+    } catch {
+      return null;
+    }
+  }).filter(Boolean);
+  
+  const uniqueDomains = [...new Set(domains)];
+  if (uniqueDomains.length > 1) {
+    console.warn(`⚠️  경고: 여러 도메인이 감지되었습니다: ${uniqueDomains.join(', ')}`);
+    console.warn(`   한 사이트의 여러 페이지만 입력해야 정확한 평가가 가능합니다.`);
+  }
+  
   const itemScores = {};
   const itemCounts = {};
   
