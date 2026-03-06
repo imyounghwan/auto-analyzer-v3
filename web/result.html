@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>분석 결과 - Auto Analyzer v3.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- 헤더 -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-chart-line text-indigo-600"></i>
+                Auto Analyzer v3.0 - 분석 결과
+            </h1>
+            <p class="text-lg text-gray-600">Nielsen 10대 원칙 기반 UIUX 정밀 분석</p>
+        </div>
+
+        <!-- 로딩 영역 -->
+        <div id="loading" class="text-center py-20">
+            <i class="fas fa-spinner fa-spin text-6xl text-indigo-600 mb-4"></i>
+            <p class="text-xl text-gray-700">분석 결과를 불러오는 중...</p>
+        </div>
+
+        <!-- 결과 영역 -->
+        <div id="result" class="hidden">
+            <!-- 종합 점수 -->
+            <div class="bg-white rounded-2xl shadow-2xl p-8 mb-8">
+                <div class="text-center">
+                    <div class="text-lg text-gray-600 mb-2">종합 점수</div>
+                    <div id="totalScore" class="text-7xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent mb-4">
+                        0.00
+                    </div>
+                    <div id="grade" class="inline-block px-6 py-2 bg-indigo-100 text-indigo-800 rounded-full text-xl font-bold mb-6">
+                        -
+                    </div>
+                    <div class="flex justify-center gap-8 mt-6">
+                        <div>
+                            <div class="text-sm text-gray-600 mb-1">실측률</div>
+                            <div id="measuredRate" class="text-3xl font-bold text-green-600">0%</div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-600 mb-1">분석 항목</div>
+                            <div id="itemCount" class="text-3xl font-bold text-indigo-600">0개</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 레이더 차트 -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+                    <i class="fas fa-chart-area text-indigo-600"></i>
+                    Nielsen 10대 원칙 분석
+                </h2>
+                <div class="max-w-2xl mx-auto">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 항목별 분포 -->
+            <div class="grid md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-green-50 rounded-xl shadow-lg p-6 border-2 border-green-200">
+                    <div class="text-center">
+                        <div class="text-green-600 text-5xl mb-2">🏆</div>
+                        <div id="excellentCount" class="text-4xl font-bold text-green-600">0</div>
+                        <div class="text-gray-700 font-bold mt-2">우수 (4.5+)</div>
+                    </div>
+                </div>
+                <div class="bg-blue-50 rounded-xl shadow-lg p-6 border-2 border-blue-200">
+                    <div class="text-center">
+                        <div class="text-blue-600 text-5xl mb-2">👍</div>
+                        <div id="goodCount" class="text-4xl font-bold text-blue-600">0</div>
+                        <div class="text-gray-700 font-bold mt-2">양호 (4.0+)</div>
+                    </div>
+                </div>
+                <div class="bg-yellow-50 rounded-xl shadow-lg p-6 border-2 border-yellow-200">
+                    <div class="text-center">
+                        <div class="text-yellow-600 text-5xl mb-2">✋</div>
+                        <div id="fairCount" class="text-4xl font-bold text-yellow-600">0</div>
+                        <div class="text-gray-700 font-bold mt-2">보통 (3.0+)</div>
+                    </div>
+                </div>
+                <div class="bg-red-50 rounded-xl shadow-lg p-6 border-2 border-red-200">
+                    <div class="text-center">
+                        <div class="text-red-600 text-5xl mb-2">⚠️</div>
+                        <div id="poorCount" class="text-4xl font-bold text-red-600">0</div>
+                        <div class="text-gray-700 font-bold mt-2">미흡 (3.0-)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 상위 5개 항목 -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                    <i class="fas fa-star text-yellow-500"></i>
+                    상위 5개 항목
+                </h2>
+                <div id="topItems" class="space-y-3">
+                    <!-- 동적 생성 -->
+                </div>
+            </div>
+
+            <!-- 하위 5개 항목 -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                    <i class="fas fa-exclamation-triangle text-red-500"></i>
+                    개선 필요 항목
+                </h2>
+                <div id="bottomItems" class="space-y-3">
+                    <!-- 동적 생성 -->
+                </div>
+            </div>
+
+            <!-- 측정 방식 -->
+            <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                    <i class="fas fa-microscope text-purple-600"></i>
+                    측정 방식
+                </h2>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-xl p-6 shadow">
+                        <div class="text-purple-600 text-3xl mb-3">🤖</div>
+                        <div class="text-2xl font-bold text-gray-800 mb-2" id="puppeteerCount">0개</div>
+                        <div class="text-sm text-gray-600">Puppeteer 실측 (95%+)</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow">
+                        <div class="text-blue-600 text-3xl mb-3">⚡</div>
+                        <div class="text-2xl font-bold text-gray-800 mb-2" id="lighthouseCount">0개</div>
+                        <div class="text-sm text-gray-600">Lighthouse 실측 (98%)</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow">
+                        <div class="text-gray-600 text-3xl mb-3">📄</div>
+                        <div class="text-2xl font-bold text-gray-800 mb-2" id="htmlCount">0개</div>
+                        <div class="text-sm text-gray-600">HTML 분석 (75-80%)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 에러 영역 -->
+        <div id="error" class="hidden">
+            <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg">
+                <div class="flex items-start gap-4">
+                    <i class="fas fa-exclamation-circle text-red-600 text-3xl"></i>
+                    <div>
+                        <h3 class="text-xl font-bold text-red-800 mb-2">분석 결과를 불러올 수 없습니다</h3>
+                        <p class="text-red-700" id="errorMessage"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URL 파라미터에서 파일명 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const filename = urlParams.get('file');
+
+        if (!filename) {
+            showError('파일명이 지정되지 않았습니다.');
+        } else {
+            loadResult(filename);
+        }
+
+        async function loadResult(filename) {
+            try {
+                const response = await fetch(`/output/${filename}`);
+                if (!response.ok) {
+                    throw new Error(`파일을 찾을 수 없습니다: ${filename}`);
+                }
+                
+                const data = await response.json();
+                displayResult(data);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function displayResult(data) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('result').classList.remove('hidden');
+
+            // 종합 점수
+            document.getElementById('totalScore').textContent = data.summary.totalScore.toFixed(2);
+            document.getElementById('grade').textContent = data.summary.grade;
+            document.getElementById('measuredRate').textContent = data.summary.overallMeasuredRate;
+            document.getElementById('itemCount').textContent = `${data.summary.itemCount}개`;
+
+            // 항목별 분포
+            document.getElementById('excellentCount').textContent = data.summary.excellentCount;
+            document.getElementById('goodCount').textContent = data.summary.goodCount;
+            document.getElementById('fairCount').textContent = data.summary.fairCount;
+            document.getElementById('poorCount').textContent = data.summary.poorCount;
+
+            // 측정 방식
+            document.getElementById('puppeteerCount').textContent = `${data.summary.accuracyBreakdown.puppeteerMeasured}개`;
+            document.getElementById('lighthouseCount').textContent = `${data.summary.accuracyBreakdown.patternMatched}개`;
+            document.getElementById('htmlCount').textContent = `${data.summary.accuracyBreakdown.htmlOnly}개`;
+
+            // 레이더 차트
+            createRadarChart(data.scores);
+
+            // 상위/하위 항목
+            displayTopBottomItems(data.scores);
+        }
+
+        function createRadarChart(scores) {
+            // Nielsen 10대 원칙별 평균 계산
+            const principles = {
+                'N1: 시스템 상태 가시성': ['N1_1_status_visibility', 'N1_2_feedback_timing', 'N1_3_action_feedback'],
+                'N2: 현실 세계 일치': ['N2_1_familiar_terms', 'N2_2_natural_flow'],
+                'N3: 사용자 제어': ['N3_1_undo_redo', 'N3_2_emergency_exit', 'N3_3_flexible_navigation'],
+                'N4: 일관성과 표준': ['N4_1_visual_consistency', 'N4_2_terminology_consistency', 'N4_3_standard_compliance'],
+                'N5: 오류 예방': ['N5_1_input_validation', 'N5_2_confirmation_dialog', 'N5_3_constraints'],
+                'N6: 인식보다 회상': ['N6_1_visible_options', 'N6_2_recognition_cues', 'N6_3_memory_load'],
+                'N7: 유연성과 효율성': ['N7_1_accelerators', 'N7_2_personalization', 'N7_3_batch_operations'],
+                'N8: 미니멀 디자인': ['N8_1_essential_info', 'N8_2_clean_interface', 'N8_3_visual_hierarchy'],
+                'N9: 오류 복구': ['N9_1_error_messages', 'N9_2_recovery_support'],
+                'N10: 도움말': ['N10_1_help_visibility', 'N10_2_documentation']
+            };
+
+            const labels = Object.keys(principles);
+            const values = labels.map(label => {
+                const items = principles[label];
+                const sum = items.reduce((acc, item) => acc + (scores[item] || 0), 0);
+                return sum / items.length;
+            });
+
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '점수',
+                        data: values,
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(99, 102, 241, 1)'
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 5,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function displayTopBottomItems(scores) {
+            const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+            const top5 = sortedScores.slice(0, 5);
+            const bottom5 = sortedScores.slice(-5).reverse();
+
+            // 상위 5개
+            const topHTML = top5.map(([ key, value], index) => `
+                <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                    <div class="flex items-center gap-4">
+                        <div class="text-2xl font-bold text-green-600">${index + 1}</div>
+                        <div>
+                            <div class="font-bold text-gray-800">${key}</div>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-green-600">${value.toFixed(1)}</div>
+                </div>
+            `).join('');
+            document.getElementById('topItems').innerHTML = topHTML;
+
+            // 하위 5개
+            const bottomHTML = bottom5.map(([key, value], index) => `
+                <div class="flex items-center justify-between p-4 bg-red-50 rounded-lg">
+                    <div class="flex items-center gap-4">
+                        <div class="text-2xl font-bold text-red-600">${index + 1}</div>
+                        <div>
+                            <div class="font-bold text-gray-800">${key}</div>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-red-600">${value.toFixed(1)}</div>
+                </div>
+            `).join('');
+            document.getElementById('bottomItems').innerHTML = bottomHTML;
+        }
+
+        function showError(message) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.remove('hidden');
+            document.getElementById('errorMessage').textContent = message;
+        }
+    </script>
+</body>
+</html>

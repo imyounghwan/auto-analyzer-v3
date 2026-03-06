@@ -325,6 +325,11 @@
             setTimeout(() => {
                 document.getElementById('commandSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 300);
+
+            // 결과 확인 안내 추가
+            setTimeout(() => {
+                alert('분석이 완료되면 output 폴더의 JSON 파일을 확인하거나\n/result?file=analysis-YYYY-MM-DD-HH-MM-SS.json 으로 결과를 볼 수 있습니다.');
+            }, 1000);
         }
 
         function copyCommand() {
