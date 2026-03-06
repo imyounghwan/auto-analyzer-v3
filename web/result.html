@@ -4,370 +4,805 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>분석 결과 - Auto Analyzer v3.0</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
+        :root {
+            --primary: #0066FF;
+            --secondary: #00C9A7;
+            --dark: #0A0E27;
+            --text: #E5E7EB;
+            --text-muted: #9CA3AF;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1a1a1a;
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0066FF, #00C9A7);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 900;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 80px 20px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #0066FF;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .section-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .score-display {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .score-large {
+            font-size: 72px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #0066FF, #00C9A7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+        
+        .score-group {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 30px;
+        }
+        
+        .score-item {
+            text-align: center;
+        }
+        
+        .score-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .score-value {
+            font-size: 36px;
+            font-weight: 800;
+        }
+        
+        .score-value.convenience {
+            color: #00C9A7;
+        }
+        
+        .score-value.design {
+            color: #9333EA;
+        }
+        
+        .btn-download {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 8px;
+        }
+        
+        .btn-pdf {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-pdf:hover {
+            background: #dc2626;
+            box-shadow: 0 15px 40px rgba(239, 68, 68, 0.5);
+        }
+        
+        .btn-ppt {
+            background: #f59e0b;
+            color: white;
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+        }
+        
+        .btn-ppt:hover {
+            background: #d97706;
+            box-shadow: 0 15px 40px rgba(245, 158, 11, 0.5);
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #0066FF;
+            color: var(--text);
+        }
+        
+        .section-title.convenience {
+            border-bottom-color: #00C9A7;
+            color: #00C9A7;
+        }
+        
+        .section-title.design {
+            border-bottom-color: #9333EA;
+            color: #9333EA;
+        }
+        
         .item-card {
-            background: rgba(255,255,255,0.05);
             border-left: 4px solid #6366f1;
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
         }
-        .badge {
-            display: inline-block;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
+        
+        .item-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 102, 255, 0.5);
         }
-        .badge-excellent { background: #10b981; color: white; }
-        .badge-good { background: #3b82f6; color: white; }
-        .badge-fair { background: #f59e0b; color: white; }
-        .badge-poor { background: #ef4444; color: white; }
-        .section-title {
-            font-size: 16px;
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+            gap: 20px;
+        }
+        
+        .item-title {
             font-weight: 700;
-            color: #e5e7eb;
-            margin-top: 16px;
-            margin-bottom: 8px;
+            color: var(--text);
+            font-size: 18px;
+            line-height: 1.4;
+            flex: 1;
+        }
+        
+        .item-score-area {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 15px;
         }
-        .section-content {
+        
+        .item-score {
+            font-size: 36px;
+            font-weight: 900;
+            line-height: 1;
+        }
+        
+        .btn-edit {
+            background: #0066FF;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
             font-size: 14px;
-            line-height: 1.8;
-            color: #d1d5db;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
         }
-        body {
-            background: #1a1a1a;
-            color: #e5e7eb;
+        
+        .btn-edit:hover {
+            background: #0052CC;
+            box-shadow: 0 6px 16px rgba(0, 102, 255, 0.5);
+        }
+        
+        .info-box {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-size: 15px;
+            line-height: 1.8;
+            font-weight: 500;
+        }
+        
+        .info-box.description {
+            background: rgba(0, 102, 255, 0.05);
+            border: 1px solid rgba(0, 102, 255, 0.1);
+        }
+        
+        .info-box.reason {
+            background: rgba(245, 158, 11, 0.05);
+            border: 1px solid rgba(245, 158, 11, 0.1);
+        }
+        
+        .info-box.criteria {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .info-box.diagnosis {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 2px solid;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1a1f36 0%, #0d1117 100%);
+            border: 2px solid rgba(0, 102, 255, 0.3);
+            border-radius: 20px;
+            padding: 35px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-title {
+            color: #0066FF;
+            margin-bottom: 25px;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            color: var(--text);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1rem;
+        }
+        
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #0066FF;
+            background: rgba(0, 102, 255, 0.05);
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+        
+        .btn-modal {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-save {
+            background: #0066FF;
+            color: white;
+        }
+        
+        .btn-save:hover {
+            background: #0052CC;
+        }
+        
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+        }
+        
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .page-link {
+            color: #0066FF;
+            text-decoration: none;
+            word-break: break-all;
+        }
+        
+        .page-link:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
-        <!-- 헤더 -->
-        <div class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-2xl p-8 mb-8 text-center">
-            <h1 class="text-4xl font-bold mb-2">
+    <div class="container">
+        <div class="header">
+            <h1>
                 <i class="fas fa-chart-line"></i>
                 Auto Analyzer v3.0 - 분석 결과
             </h1>
-            <p class="text-lg opacity-90">Nielsen 10대 원칙 기반 UIUX 정밀 분석</p>
+            <p style="font-size: 1.1rem; opacity: 0.9;">Nielsen 10대 원칙 기반 UIUX 정밀 분석</p>
         </div>
-
-        <!-- 로딩 -->
-        <div id="loading" class="text-center py-20">
-            <i class="fas fa-spinner fa-spin text-6xl text-indigo-600 mb-4"></i>
-            <p class="text-xl text-gray-300">분석 결과를 불러오는 중...</p>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p style="font-size: 1.2rem; color: var(--text-muted);">분석 결과를 불러오는 중...</p>
         </div>
-
-        <!-- 결과 영역 -->
-        <div id="result" class="hidden">
+        
+        <div id="result" style="display: none;">
             <!-- 분석된 페이지 목록 -->
-            <div id="analyzedPages" class="mb-8"></div>
-
+            <div id="analyzedPages"></div>
+            
             <!-- 종합 점수 -->
-            <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl p-8 mb-8 border border-gray-700">
-                <div class="text-center">
-                    <div class="text-gray-400 mb-2">종합 점수</div>
-                    <div id="totalScore" class="text-7xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent mb-4">0.00</div>
-                    <div id="grade" class="inline-block px-6 py-2 bg-indigo-900 text-indigo-200 rounded-full text-xl font-bold mb-6">-</div>
-                    
-                    <div class="flex justify-center gap-12 my-8">
-                        <div class="text-center">
-                            <div class="text-sm text-gray-400 mb-2">편의성</div>
-                            <div id="convenienceScore" class="text-4xl font-bold text-cyan-400">0.00</div>
+            <div class="section-card">
+                <div class="score-display">
+                    <div style="font-size: 16px; color: var(--text-muted); margin-bottom: 15px; font-weight: 500;">종합 점수</div>
+                    <div id="totalScore" class="score-large">0.00</div>
+                    <div class="score-group">
+                        <div class="score-item">
+                            <div class="score-label">편의성</div>
+                            <div id="convenienceScore" class="score-value convenience">0.00</div>
                         </div>
-                        <div class="text-center">
-                            <div class="text-sm text-gray-400 mb-2">디자인</div>
-                            <div id="designScore" class="text-4xl font-bold text-purple-400">0.00</div>
+                        <div class="score-item">
+                            <div class="score-label">디자인</div>
+                            <div id="designScore" class="score-value design">0.00</div>
                         </div>
                     </div>
-
-                    <!-- PDF/PPT 다운로드 버튼 -->
-                    <div class="flex justify-center gap-4 mt-8">
-                        <button onclick="downloadPDF()" class="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition shadow-lg flex items-center gap-2">
+                    
+                    <!-- 다운로드 버튼 -->
+                    <div style="margin-top: 40px;">
+                        <button id="downloadPdfBtn" class="btn-download btn-pdf">
                             <i class="fas fa-file-pdf"></i> PDF 다운로드
                         </button>
-                        <button onclick="downloadPPT()" class="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition shadow-lg flex items-center gap-2">
+                        <button id="downloadPptBtn" class="btn-download btn-ppt">
                             <i class="fas fa-file-powerpoint"></i> PPT 다운로드
                         </button>
                     </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-                        <div class="bg-green-900 bg-opacity-30 p-4 rounded-lg border border-green-700">
-                            <div class="text-sm text-gray-400">우수 (4.5+)</div>
-                            <div id="excellentCount" class="text-3xl font-bold text-green-400">0</div>
-                        </div>
-                        <div class="bg-blue-900 bg-opacity-30 p-4 rounded-lg border border-blue-700">
-                            <div class="text-sm text-gray-400">양호 (4.0+)</div>
-                            <div id="goodCount" class="text-3xl font-bold text-blue-400">0</div>
-                        </div>
-                        <div class="bg-yellow-900 bg-opacity-30 p-4 rounded-lg border border-yellow-700">
-                            <div class="text-sm text-gray-400">보통 (3.0+)</div>
-                            <div id="fairCount" class="text-3xl font-bold text-yellow-400">0</div>
-                        </div>
-                        <div class="bg-red-900 bg-opacity-30 p-4 rounded-lg border border-red-700">
-                            <div class="text-sm text-gray-400">미흡 (3.0-)</div>
-                            <div id="poorCount" class="text-3xl font-bold text-red-400">0</div>
-                        </div>
-                    </div>
                 </div>
             </div>
-
+            
             <!-- 총평 -->
-            <div id="summarySection" class="mb-8"></div>
-
-            <!-- 43개 Nielsen 항목 상세 -->
-            <div id="itemsList"></div>
-        </div>
-
-        <!-- 에러 -->
-        <div id="error" class="hidden bg-red-900 bg-opacity-30 border-l-4 border-red-500 p-6 rounded-lg">
-            <h3 class="text-xl font-bold text-red-400 mb-2">오류 발생</h3>
-            <p class="text-red-300" id="errorMessage"></p>
+            <div id="summary"></div>
+            
+            <!-- 편의성 항목 -->
+            <div class="section-card">
+                <h2 class="section-title convenience">
+                    <i class="fas fa-clipboard-check"></i> 편의성 항목 (37개)
+                </h2>
+                <div id="convenienceItems"></div>
+            </div>
+            
+            <!-- 디자인 항목 -->
+            <div class="section-card">
+                <h2 class="section-title design">
+                    <i class="fas fa-palette"></i> 디자인 항목 (5개)
+                </h2>
+                <div id="designItems"></div>
+            </div>
         </div>
     </div>
-
+    
+    <!-- 점수 수정 모달 -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title">
+                <i class="fas fa-edit"></i> 평가 항목 수정
+            </h3>
+            
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; margin-bottom: 25px;">
+                <div id="modalItemName" style="color: var(--text); font-weight: 600; font-size: 1.05rem;"></div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-star" style="color: #FFD700;"></i> 점수 (0.0 ~ 5.0)
+                </label>
+                <input type="number" id="newScoreInput" class="form-input" min="0" max="5" step="0.1">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-stethoscope" style="color: #00C9A7;"></i> 진단 내용
+                </label>
+                <textarea id="newDescriptionInput" class="form-textarea" rows="3"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-lightbulb" style="color: #f59e0b;"></i> 권장사항
+                </label>
+                <textarea id="newRecommendationInput" class="form-textarea" rows="3"></textarea>
+            </div>
+            
+            <div class="modal-buttons">
+                <button id="cancelBtn" class="btn-modal btn-cancel">취소</button>
+                <button id="saveBtn" class="btn-modal btn-save">저장</button>
+            </div>
+        </div>
+    </div>
+    
     <script>
+        let currentData = null;
+        let currentEditItem = null;
+        
+        // URL에서 filename 파라미터 가져오기
         const urlParams = new URLSearchParams(window.location.search);
         const filename = urlParams.get('file');
-        let currentData = null;
-
+        
         if (!filename) {
-            showError('파일명이 지정되지 않았습니다.');
+            document.getElementById('loading').innerHTML = `
+                <div style="color: #ef4444; text-align: center;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 60px; margin-bottom: 20px;"></i>
+                    <h2 style="font-size: 24px; margin-bottom: 10px;">파일명이 지정되지 않았습니다</h2>
+                    <p>올바른 URL 형식: result.html?file=analysis-2026-03-06T00-00-00.json</p>
+                </div>
+            `;
         } else {
             loadResult(filename);
         }
-
+        
         async function loadResult(filename) {
             try {
-                const response = await fetch(`/output/${filename}`);
-                if (!response.ok) throw new Error(`파일을 찾을 수 없습니다: ${filename}`);
+                const response = await fetch(`/api/latest`);
+                const result = await response.json();
                 
-                const data = await response.json();
-                currentData = data;
-                displayResult(data);
+                if (!result.success) {
+                    throw new Error('분석 결과를 가져올 수 없습니다');
+                }
+                
+                currentData = result.data;
+                displayResult(currentData);
+                
             } catch (error) {
-                showError(error.message);
+                console.error('Error:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div style="color: #ef4444; text-align: center;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 60px; margin-bottom: 20px;"></i>
+                        <h2 style="font-size: 24px; margin-bottom: 10px;">분석 결과를 불러올 수 없습니다</h2>
+                        <p>${error.message}</p>
+                    </div>
+                `;
             }
         }
-
+        
         function displayResult(data) {
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('result').classList.remove('hidden');
-
-            // 분석된 페이지 목록 (예시 - 실제로는 data.analyzed_pages에서 가져와야 함)
-            const analyzedPagesHTML = `
-                <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 mb-8 border border-gray-700">
-                    <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-                        <i class="fas fa-file-alt text-blue-400"></i>
-                        분석된 페이지 (총 ${data.url ? '1' : '0'}개)
-                    </h3>
-                    <div class="space-y-3">
-                        <div class="bg-gray-900 bg-opacity-50 p-4 rounded-lg border border-gray-700">
-                            <div class="text-sm text-gray-400 mb-2">메인 페이지</div>
-                            <a href="${data.url}" target="_blank" class="text-blue-400 hover:text-blue-300 break-all">${data.url}</a>
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+            
+            // 종합 점수 표시
+            displayScores(data);
+            
+            // 분석된 페이지 목록
+            displayAnalyzedPages(data);
+            
+            // 총평
+            displaySummary(data);
+            
+            // 편의성/디자인 항목
+            displayItems(data);
+        }
+        
+        function displayScores(data) {
+            const overall = data.totalScore || 0;
+            document.getElementById('totalScore').textContent = overall.toFixed(2);
+            
+            // 편의성/디자인 점수는 v3에서는 아직 분리되지 않았으므로 임시로 같은 값 사용
+            document.getElementById('convenienceScore').textContent = overall.toFixed(2);
+            document.getElementById('designScore').textContent = overall.toFixed(2);
+        }
+        
+        function displayAnalyzedPages(data) {
+            // v3는 analyzed_pages가 없으므로 URL만 표시
+            const html = `
+                <div class="section-card">
+                    <div style="font-weight: 700; color: var(--text); margin-bottom: 20px; font-size: 18px; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 24px;">📄</span> 분석된 페이지
+                    </div>
+                    <div style="font-size: 16px; color: #D1D5DB; line-height: 2;">
+                        <div style="margin-bottom: 15px;">
+                            <strong style="color: var(--text-muted); font-size: 14px;">메인 페이지</strong><br>
+                            <a href="${data.url}" target="_blank" class="page-link">${data.url}</a>
                         </div>
                     </div>
-                    <div class="mt-4 p-4 bg-blue-900 bg-opacity-20 rounded-lg border border-blue-700">
-                        <p class="text-sm text-gray-300">
-                            <i class="fas fa-info-circle text-blue-400"></i>
-                            탐색기로 식별된 페이지는 평균 <strong class="text-blue-400">15~20%p</strong> 점수가 상승합니다.
-                        </p>
+                </div>
+            `;
+            document.getElementById('analyzedPages').innerHTML = html;
+        }
+        
+        function displaySummary(data) {
+            const grade = data.grade || 'B';
+            const html = `
+                <div class="section-card">
+                    <div style="font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 28px;">📋</span> 종합 평가 총평
+                    </div>
+                    <div style="font-size: 16px; color: #D1D5DB; line-height: 2; padding: 20px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                        전체 ${data.summary.total_items}개 항목 중 ${data.summary.measured_items}개 항목을 실측하여 종합 점수 ${data.totalScore.toFixed(2)}/5.0 (등급: ${grade})을 기록했습니다.<br><br>
+                        <strong>우수:</strong> ${data.summary.excellent}개, <strong>양호:</strong> ${data.summary.good}개, <strong>보통:</strong> ${data.summary.fair}개, <strong>미흡:</strong> ${data.summary.poor}개
                     </div>
                 </div>
             `;
-            document.getElementById('analyzedPages').innerHTML = analyzedPagesHTML;
-
-            // 종합 점수
-            const totalScore = data.summary.totalScore;
-            const convScore = calculateCategoryScore(data.scores, 'convenience');
-            const designScore = calculateCategoryScore(data.scores, 'design');
+            document.getElementById('summary').innerHTML = html;
+        }
+        
+        function displayItems(data) {
+            const convenienceHTML = renderItems(data.items, 'convenience');
+            const designHTML = renderItems(data.items.slice(0, 5), 'design'); // 임시로 처음 5개를 디자인으로
             
-            document.getElementById('totalScore').textContent = totalScore.toFixed(2);
-            document.getElementById('grade').textContent = data.summary.grade;
-            document.getElementById('convenienceScore').textContent = convScore.toFixed(2);
-            document.getElementById('designScore').textContent = designScore.toFixed(2);
-            document.getElementById('excellentCount').textContent = data.summary.excellentCount;
-            document.getElementById('goodCount').textContent = data.summary.goodCount;
-            document.getElementById('fairCount').textContent = data.summary.fairCount;
-            document.getElementById('poorCount').textContent = data.summary.poorCount;
-
-            // 총평
-            const summaryHTML = `
-                <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 border border-gray-700">
-                    <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-                        <i class="fas fa-clipboard-list text-green-400"></i>
-                        종합 평가 총평
-                    </h3>
-                    <div class="text-gray-300 leading-relaxed space-y-3">
-                        <p><strong class="text-blue-400">**총평 (42개 항목 평균 평가):**</strong></p>
-                        <p>**📊 Nielsen 십칙 기반 (작습적 근거):**</p>
-                        <p class="pl-4">B등급 (양호). 경미한 시용성 개선 필요. 기본적인 사용성은 문제가 없습니다.</p>
-                        <p class="text-gray-400 text-sm">※ 근거: Jakob Nielsen's Severity Ratings (1994)</p>
-                    </div>
-                </div>
-            `;
-            document.getElementById('summarySection').innerHTML = summaryHTML;
-
-            // 43개 항목 카드 생성
-            const sortedScores = Object.entries(data.scores).sort((a, b) => b[1] - a[1]);
-            const itemsHTML = sortedScores.map(([key, score]) => createItemCard(key, score, data)).join('');
-            document.getElementById('itemsList').innerHTML = itemsHTML;
+            document.getElementById('convenienceItems').innerHTML = convenienceHTML;
+            document.getElementById('designItems').innerHTML = designHTML;
         }
-
-        function calculateCategoryScore(scores, category) {
-            // 편의성/디자인 구분은 실제 항목 분류에 따라 다르게 구현 필요
-            // 여기서는 전체 평균으로 대체
-            const values = Object.values(scores);
-            return values.reduce((a, b) => a + b, 0) / values.length;
-        }
-
-        function createItemCard(key, score, data) {
-            const descriptions = getItemDescription(key);
-            const badge = getBadge(score);
-            const measured = isMeasured(key);
-            const details = getDetails(key, data);
-
-            return `
-                <div class="item-card">
-                    <div class="flex justify-between items-start mb-4 gap-4">
-                        <div class="flex-1">
-                            <h3 class="text-xl font-bold text-white mb-2">${descriptions.title}</h3>
-                            <div class="flex gap-2 items-center flex-wrap">
-                                <span class="badge ${badge.class}">${badge.text}</span>
-                                <span class="text-3xl font-bold text-indigo-400">${score.toFixed(1)}</span>
-                                <span class="text-sm text-gray-500">/ 5.0</span>
-                                ${measured ? '<span class="text-xs bg-green-800 text-green-200 px-2 py-1 rounded">실측</span>' : '<span class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">추정</span>'}
+        
+        function renderItems(items, type) {
+            return items.map((item, index) => {
+                const itemId = `item-${type}-${index}`;
+                const scoreColor = item.score >= 4.5 ? '#00C9A7' : item.score >= 3.5 ? '#0066FF' : item.score >= 2.5 ? '#f59e0b' : '#ef4444';
+                const gradeName = item.score >= 4.5 ? '매우 우수' : item.score >= 4.0 ? '우수' : item.score >= 3.0 ? '양호' : item.score >= 2.0 ? '보통' : '미흡';
+                
+                return `
+                    <div id="${itemId}" class="item-card" style="border-left-color: ${scoreColor};">
+                        <div class="item-header">
+                            <div style="flex: 1;">
+                                <div class="item-title">${getItemName(item.itemId)}</div>
+                                <div style="font-size: 13px; color: #0066FF; font-weight: 600; background: rgba(0, 102, 255, 0.1); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-top: 8px;">
+                                    ${item.method === 'measured' ? '실측' : '추정'} (${item.accuracy}% 정확도)
+                                </div>
+                            </div>
+                            <div class="item-score-area">
+                                <div style="text-align: right;">
+                                    <div id="${itemId}-score" class="item-score" style="color: ${scoreColor};">${item.score.toFixed(1)}</div>
+                                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px; font-weight: 600;">${gradeName}</div>
+                                </div>
+                                <button class="btn-edit" onclick="openEditModal('${itemId}', '${item.itemId}', '${getItemName(item.itemId)}', ${item.score})">
+                                    ✏️ 수정
+                                </button>
                             </div>
                         </div>
-                        <button onclick="editScore('${key}', ${score})" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition">
-                            <i class="fas fa-edit"></i> 수정
-                        </button>
+                        
+                        <div class="info-box description">
+                            <div>
+                                📝 <strong style="color: #0066FF;">항목 설명:</strong> ${getItemDescription(item.itemId)}
+                            </div>
+                        </div>
+                        
+                        <div class="info-box reason">
+                            <div>
+                                💡 <strong style="color: #f59e0b;">중요한 이유:</strong> ${getItemReason(item.itemId)}
+                            </div>
+                        </div>
+                        
+                        <div class="info-box criteria">
+                            <div>
+                                🔍 <strong style="color: var(--text-muted);">평가 기준:</strong> ${getItemCriteria(item.itemId)}
+                            </div>
+                        </div>
+                        
+                        <div id="${itemId}-diagnosis" class="info-box diagnosis" style="border-color: ${scoreColor}; background: ${item.score >= 4.0 ? 'rgba(0, 201, 167, 0.1)' : item.score >= 3.0 ? 'rgba(0, 102, 255, 0.1)' : 'rgba(239, 68, 68, 0.1)'};">
+                            <div>
+                                📊 <strong style="color: ${scoreColor};">진단 결과:</strong> ${item.result || '진단 정보 없음'}
+                            </div>
+                        </div>
+                        
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="background: ${scoreColor}; width: ${(item.score/5)*100}%;"></div>
+                        </div>
                     </div>
-
-                    <div class="section-title">
-                        <i class="fas fa-chart-bar text-indigo-400"></i>
-                        평가 결과
-                    </div>
-                    <div class="section-content">
-                        ${key} 점수는 <strong class="text-white">${score.toFixed(1)}/5.0</strong>입니다. 
-                        ${measured ? 'Puppeteer 또는 Lighthouse를 통해 실제 브라우저에서 측정되었습니다.' : 'HTML 정적 분석을 통해 추정되었습니다.'}
-                        ${details}
-                    </div>
-
-                    <div class="section-title">
-                        <i class="fas fa-lightbulb text-yellow-400"></i>
-                        중요 이유
-                    </div>
-                    <div class="section-content">
-                        ${descriptions.importance}
-                    </div>
-
-                    <div class="section-title">
-                        <i class="fas fa-clipboard-check text-blue-400"></i>
-                        평가 기준
-                    </div>
-                    <div class="section-content">
-                        ${descriptions.criteria}
-                    </div>
-
-                    <div class="section-title">
-                        <i class="fas fa-tools text-green-400"></i>
-                        개선 제안
-                    </div>
-                    <div class="section-content">
-                        ${descriptions.suggestion}
-                    </div>
-                </div>
-            `;
+                `;
+            }).join('');
         }
-
-        function getItemDescription(key) {
-            const descriptions = {
-                'N17_3_cls_stability': {
-                    title: 'CLS 안정성 (Cumulative Layout Shift)',
-                    importance: '글을 읽거나 클릭하려는 내용이 갑자기 움직이면 사용자가 혼란스러워하고 잘못된 곳을 클릭하게 됩니다.',
-                    criteria: 'CLS < 0.1 (5.5점), < 0.25 (3.5점), >= 0.25 (2.5점)',
-                    suggestion: 'img 태그에 width와 height 속성을 지정하고, font-display: swap을 사용하세요.'
-                },
-                'N1_3_action_feedback': {
-                    title: '행동 피드백',
-                    importance: '모든 인터랙티브 요소는 마우스 호버나 클릭 시 명확한 반응을 보여야 합니다.',
-                    criteria: '모든 버튼과 링크의 호버 효과 및 클릭 피드백을 Puppeteer로 실제 테스트합니다.',
-                    suggestion: 'CSS에서 :hover와 :active 상태에 명확한 시각적 변화를 추가하세요.'
-                }
+        
+        // 항목 이름 매핑 (한글)
+        function getItemName(itemId) {
+            const names = {
+                'N1_1': '시스템 상태 가시성',
+                'N1_2': '피드백 타이밍',
+                'N1_3': '액션 피드백',
+                'N3_2': '비상 탈출',
+                'N3_3': '유연한 네비게이션',
+                'N4_1': '시각적 일관성',
+                'N5_1': '입력 검증',
+                'N6_1': '가시적 옵션',
+                'N7_1': '단축키 지원',
+                'N8_1': '필수 정보 표시',
+                'N9_1': '오류 메시지 품질',
+                'N10_1': '도움말 가시성',
+                'N11_1': '검색 자동완성',
+                'N12_1': '반응형 레이아웃',
+                'N13': '콘텐츠 신선도',
+                'N14_1': '색상 대비',
+                'N15': '파일 다운로드',
+                'N16': '폼 복잡도',
+                'N17_1': 'LCP 성능',
+                'N17_2': 'FID 응답성',
+                'N17_3': 'CLS 안정성',
+                'N17_4': 'TTI 상호작용'
             };
+            return names[itemId] || itemId;
+        }
+        
+        function getItemDescription(itemId) {
+            return '이 항목은 사용자가 시스템의 현재 상태를 명확하게 인지할 수 있는지 평가합니다.';
+        }
+        
+        function getItemReason(itemId) {
+            return '사용자는 시스템이 무엇을 하고 있는지 항상 알아야 하며, 적절한 피드백을 통해 안심하고 작업을 진행할 수 있습니다.';
+        }
+        
+        function getItemCriteria(itemId) {
+            return '5.0: 완벽한 상태 표시, 4.0: 우수한 피드백, 3.0: 기본적 피드백, 2.0: 부족한 피드백, 1.0: 피드백 없음';
+        }
+        
+        // 점수 수정 모달
+        function openEditModal(itemId, itemIdValue, itemName, originalScore) {
+            currentEditItem = { itemId, itemIdValue, itemName, originalScore };
             
-            return descriptions[key] || {
-                title: key.replace(/_/g, ' '),
-                importance: '이 항목은 사용자 경험에 중요한 영향을 미칩니다.',
-                criteria: 'HTML 구조, ARIA 속성, 시맨틱 태그 등을 분석하여 평가합니다.',
-                suggestion: '웹 표준과 접근성 가이드라인을 따라 개선하세요.'
-            };
+            document.getElementById('modalItemName').textContent = itemName;
+            document.getElementById('newScoreInput').value = originalScore.toFixed(1);
+            document.getElementById('newDescriptionInput').value = '';
+            document.getElementById('newRecommendationInput').value = '';
+            
+            document.getElementById('editModal').classList.add('show');
         }
-
-        function getBadge(score) {
-            if (score >= 4.5) return { class: 'badge-excellent', text: '매우 좋음' };
-            if (score >= 4.0) return { class: 'badge-good', text: '좋음' };
-            if (score >= 3.0) return { class: 'badge-fair', text: '보통' };
-            return { class: 'badge-poor', text: '미흡' };
+        
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('show');
+            currentEditItem = null;
         }
-
-        function isMeasured(key) {
-            const measured = [
-                'N1_3_action_feedback', 'N3_2_emergency_exit', 'N3_3_flexible_navigation',
-                'N7_1_accelerators', 'N7_2_personalization', 'N7_3_batch_operations',
-                'N9_2_recovery_support', 'N11_1_search_autocomplete', 'N11_2_search_quality',
-                'N17_1_lcp_performance', 'N17_2_fid_responsiveness', 'N17_3_cls_stability', 'N17_4_tti_interactive'
-            ];
-            return measured.includes(key);
-        }
-
-        function getDetails(key, data) {
-            if (data.details && data.details.performance) {
-                if (key === 'N17_1_lcp_performance' && data.details.performance.lcp) {
-                    return `<br><br>Lighthouse 측정: ${data.details.performance.lcp.value.toFixed(2)}ms`;
-                }
-                if (key === 'N17_3_cls_stability' && data.details.performance.cls) {
-                    return `<br><br>Lighthouse 측정: ${data.details.performance.cls.value.toFixed(3)}`;
+        
+        function saveEditedScore() {
+            if (!currentEditItem) return;
+            
+            const newScore = parseFloat(document.getElementById('newScoreInput').value);
+            const newDescription = document.getElementById('newDescriptionInput').value;
+            const newRecommendation = document.getElementById('newRecommendationInput').value;
+            
+            if (newScore < 0 || newScore > 5) {
+                alert('점수는 0.0 ~ 5.0 사이여야 합니다.');
+                return;
+            }
+            
+            // 화면 업데이트
+            const scoreElement = document.getElementById(`${currentEditItem.itemId}-score`);
+            if (scoreElement) {
+                const scoreColor = newScore >= 4.5 ? '#00C9A7' : newScore >= 3.5 ? '#0066FF' : newScore >= 2.5 ? '#f59e0b' : '#ef4444';
+                scoreElement.textContent = newScore.toFixed(1);
+                scoreElement.style.color = scoreColor;
+                
+                // 진단 결과 업데이트
+                if (newDescription) {
+                    const diagnosisElement = document.getElementById(`${currentEditItem.itemId}-diagnosis`);
+                    if (diagnosisElement) {
+                        diagnosisElement.querySelector('div').innerHTML = `📊 <strong style="color: ${scoreColor};">진단 결과:</strong> ${newDescription}`;
+                        diagnosisElement.style.borderColor = scoreColor;
+                        diagnosisElement.style.background = newScore >= 4.0 ? 'rgba(0, 201, 167, 0.1)' : newScore >= 3.0 ? 'rgba(0, 102, 255, 0.1)' : 'rgba(239, 68, 68, 0.1)';
+                    }
                 }
             }
-            return '';
-        }
-
-        function editScore(itemId, currentScore) {
-            const newScore = prompt(`${itemId} 점수를 수정하세요 (현재: ${currentScore.toFixed(1)})`, currentScore.toFixed(1));
-            if (newScore !== null && !isNaN(newScore)) {
-                const score = parseFloat(newScore);
-                if (score >= 0 && score <= 5) {
-                    alert(`점수가 ${score.toFixed(1)}로 수정되었습니다.\n\n※ 재분석 시 백엔드에 반영됩니다.`);
-                    // 실제로는 localStorage에 저장하거나 API로 전송
-                } else {
-                    alert('0~5 사이의 값을 입력하세요.');
-                }
+            
+            // localStorage에 저장
+            try {
+                const savedData = JSON.parse(localStorage.getItem('editedScores') || '{}');
+                savedData[currentEditItem.itemIdValue] = {
+                    score: newScore,
+                    description: newDescription,
+                    recommendation: newRecommendation
+                };
+                localStorage.setItem('editedScores', JSON.stringify(savedData));
+                console.log('✅ 수정된 점수 저장:', savedData);
+            } catch (e) {
+                console.error('❌ localStorage 저장 실패:', e);
             }
+            
+            // 평균 재계산
+            recalculateScores();
+            
+            closeEditModal();
         }
-
-        function downloadPDF() {
-            const pdfFilename = filename.replace('.json', '.pdf').replace('analysis-', 'report-');
-            window.open(`/output/${pdfFilename}`, '_blank');
+        
+        function recalculateScores() {
+            // TODO: 전체 항목의 평균을 재계산하여 종합/편의성/디자인 점수 업데이트
+            console.log('🔄 점수 재계산 중...');
         }
-
-        function downloadPPT() {
-            alert('PPT 다운로드 기능은 개발 중입니다.');
-        }
-
-        function showError(message) {
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('error').classList.remove('hidden');
-            document.getElementById('errorMessage').textContent = message;
-        }
+        
+        // 이벤트 리스너
+        document.getElementById('cancelBtn').addEventListener('click', closeEditModal);
+        document.getElementById('saveBtn').addEventListener('click', saveEditedScore);
+        
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('editModal').addEventListener('click', (e) => {
+            if (e.target.id === 'editModal') {
+                closeEditModal();
+            }
+        });
+        
+        // PDF 다운로드
+        document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+            alert('PDF 다운로드 기능은 추후 구현 예정입니다.');
+        });
+        
+        // PPT 다운로드
+        document.getElementById('downloadPptBtn').addEventListener('click', () => {
+            alert('PPT 다운로드 기능은 추후 구현 예정입니다.');
+        });
     </script>
 </body>
 </html>
