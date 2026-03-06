@@ -56,9 +56,10 @@ app.post('/api/analyze', (req, res) => {
   
   // Add pages parameter if provided
   if (pages && pages.length > 0) {
-    // pages 배열을 JSON으로 변환 (single quotes로 감싸서 전달)
-    const pagesJson = JSON.stringify(pages);
-    command += ` --pages '${pagesJson}'`;
+    // pages 배열을 임시 파일로 저장 (shell escaping 문제 해결)
+    const tmpFile = path.join(__dirname, '.pages.tmp.json');
+    fs.writeFileSync(tmpFile, JSON.stringify(pages), 'utf-8');
+    command += ` --pages "$(cat ${tmpFile})"`;
     console.log(`📄 평가 대상 페이지 ${pages.length}개:`);
     pages.forEach((p, i) => console.log(`   ${i+1}. ${p}`));
   }
