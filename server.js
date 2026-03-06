@@ -33,13 +33,31 @@ app.post('/api/analyze', (req, res) => {
     return res.status(400).json({ success: false, error: 'URL is required' });
   }
 
+  // 같은 도메인인지 검증
+  if (pages && pages.length > 1) {
+    try {
+      const mainDomain = new URL(pages[0]).hostname;
+      for (let i = 1; i < pages.length; i++) {
+        const pageDomain = new URL(pages[i]).hostname;
+        if (pageDomain !== mainDomain) {
+          return res.status(400).json({ 
+            success: false, 
+            error: `❌ 서로 다른 사이트를 입력할 수 없습니다!\n\n메인: ${mainDomain}\n${i+1}번: ${pageDomain}\n\n⚠️ 같은 사이트의 여러 페이지만 입력하세요.`
+          });
+        }
+      }
+    } catch (e) {
+      return res.status(400).json({ success: false, error: 'URL 형식이 올바르지 않습니다!' });
+    }
+  }
+
   // Build command
   let command = `cd ${__dirname} && npm start -- analyze --url "${url}"`;
   
   // Add pages parameter if provided
   if (pages && pages.length > 0) {
-    // pages 배열을 JSON으로 변환하여 전달
-    const pagesJson = JSON.stringify(pages).replace(/"/g, '\\"');
+    // pages 배열을 JSON으로 변환 (single quotes로 감싸서 전달)
+    const pagesJson = JSON.stringify(pages);
     command += ` --pages '${pagesJson}'`;
     console.log(`📄 평가 대상 페이지 ${pages.length}개:`);
     pages.forEach((p, i) => console.log(`   ${i+1}. ${p}`));

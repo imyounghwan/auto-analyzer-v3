@@ -385,11 +385,31 @@
             }
 
             // URL 유효성 검사 (page1)
+            let mainDomain;
             try {
-                new URL(page1);
+                const mainUrl = new URL(page1);
+                mainDomain = mainUrl.hostname;
             } catch (e) {
                 alert('메인 페이지 URL 형식이 올바르지 않습니다!\n예시: https://www.example.com');
                 return;
+            }
+
+            // 모든 페이지가 같은 도메인인지 검증
+            for (let i = 2; i <= 10; i++) {
+                const pageInput = document.getElementById(`page${i}`);
+                if (pageInput && pageInput.value.trim()) {
+                    try {
+                        const pageUrl = new URL(pageInput.value.trim());
+                        const pageDomain = pageUrl.hostname;
+                        if (pageDomain !== mainDomain) {
+                            alert(`❌ 서로 다른 사이트를 입력할 수 없습니다!\n\n메인 페이지: ${mainDomain}\n${i}번 페이지: ${pageDomain}\n\n⚠️ 같은 사이트의 여러 페이지만 입력하세요.\n예시: naver.com/main, naver.com/search`);
+                            return;
+                        }
+                    } catch (e) {
+                        alert(`${i}번 페이지 URL 형식이 올바르지 않습니다!\n예시: https://www.example.com/page`);
+                        return;
+                    }
+                }
             }
 
             // urlInput은 사용 안 함, page1 사용
