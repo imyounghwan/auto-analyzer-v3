@@ -28,10 +28,16 @@
 - **등급 산출** (A+ ~ F)
 - **레이더 차트 시각화**
 
-### 📄 자동 리포트 생성
+### 📄 v2 스타일 결과 페이지
 - **JSON 결과 파일** - 전체 분석 데이터
 - **PDF 리포트** - 차트, 그래프, 상세 점수표
-- **웹 결과 페이지** - 인터랙티브 결과 확인
+- **웹 결과 페이지 (v2 스타일 완전 복원)** ✨
+  - 📄 **분석된 페이지 목록** - 메인 + 서브 페이지
+  - 📊 **편의성/디자인 분리 표시** - 각각 별도 섹션
+  - 📋 **종합 평가 총평** - 전체 요약 및 분포
+  - ✏️ **항목별 점수 수정** - 즉시 반영 + localStorage 저장
+  - 📥 **PDF/PPT 다운로드 버튼**
+  - 🇰🇷 **한글 항목명** - N1_1 → "시스템 상태 가시성"
 
 ---
 
@@ -41,7 +47,7 @@
 
 ```bash
 # 다운로드
-wget https://www.genspark.ai/api/files/s/4miIRE9h -O auto-analyzer-v3.tar.gz
+wget https://www.genspark.ai/api/files/s/VIOrRvJZ -O auto-analyzer-v3.tar.gz
 
 # 압축 해제
 tar -xzf auto-analyzer-v3.tar.gz
