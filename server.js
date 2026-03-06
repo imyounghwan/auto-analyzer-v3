@@ -69,13 +69,11 @@ app.post('/api/analyze', (req, res) => {
   console.log(`\n🚀 분석 시작: ${url}`);
   console.log(`📝 명령어: npm ${args.join(' ')}\n`);
 
-  // Execute analysis using spawn (Windows 호환, 보안 강화)
-  const isWindows = process.platform === 'win32';
+  // Execute analysis using spawn (Windows 호환)
   const child = spawn('npm', args, {
     cwd: __dirname,
-    shell: isWindows, // Windows에서만 shell 사용
-    stdio: 'pipe',
-    windowsHide: true
+    shell: true,
+    stdio: 'pipe'
   });
 
   let outputBuffer = '';
