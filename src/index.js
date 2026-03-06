@@ -138,7 +138,3 @@ if (process.argv.length === 2) {
 }
 
 program.parse();
-m.help();
-}
-
-program.parse();
