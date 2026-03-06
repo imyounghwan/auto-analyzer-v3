@@ -67,7 +67,7 @@
 
 ### 📥 설치 (Windows)
 
-1. **다운로드**: https://www.genspark.ai/api/files/s/Khwuh0ap
+1. **다운로드**: https://www.genspark.ai/api/files/s/ZAfbvzrN
 2. **압축 해제**: `auto-analyzer-v3-같은도메인검증완성.tar.gz` 파일 압축 해제
 3. **폴더 이동**: `home\user\auto-analyzer-v3` 폴더로 이동
 4. **의존성 설치**:
