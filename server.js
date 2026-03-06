@@ -1,13 +1,18 @@
-// Simple HTTP server for web interface
+// Simple HTTP server for web interface with API endpoint
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 3000;
+
+// Parse JSON body
+app.use(express.json());
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'web')));
@@ -20,6 +25,83 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'web', 'index.html'));
 });
 
+// API endpoint for analysis
+app.post('/api/analyze', (req, res) => {
+  const { url, pdf, noCache } = req.body;
+  
+  if (!url) {
+    return res.status(400).json({ success: false, error: 'URL is required' });
+  }
+
+  // Build command
+  let command = `cd ${__dirname} && npm start -- analyze --url "${url}"`;
+  if (pdf) command += ' --pdf';
+  if (noCache) command += ' --no-cache';
+
+  console.log(`\n🚀 분석 시작: ${url}`);
+  console.log(`📝 명령어: ${command}\n`);
+
+  // Execute analysis
+  const child = exec(command, { maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`❌ 분석 실패:`, error.message);
+      return res.status(500).json({ 
+        success: false, 
+        error: error.message,
+        stderr: stderr
+      });
+    }
+
+    // Extract filename from stdout
+    const match = stdout.match(/output\/(analysis-[^.]+\.json)/);
+    const filename = match ? match[1] : null;
+
+    console.log(`✅ 분석 완료: ${filename}\n`);
+
+    res.json({
+      success: true,
+      filename: filename,
+      stdout: stdout
+    });
+  });
+
+  // Send immediate response with job started
+  res.json({
+    success: true,
+    message: '분석이 시작되었습니다. 잠시만 기다려주세요...',
+    estimatedTime: '30-90초'
+  });
+});
+
+// Check analysis status (optional - for future polling)
+app.get('/api/latest', (req, res) => {
+  const outputDir = path.join(__dirname, 'output');
+  
+  try {
+    const files = fs.readdirSync(outputDir)
+      .filter(f => f.startsWith('analysis-') && f.endsWith('.json'))
+      .map(f => ({
+        name: f,
+        time: fs.statSync(path.join(outputDir, f)).mtime.getTime()
+      }))
+      .sort((a, b) => b.time - a.time);
+    
+    if (files.length > 0) {
+      const latestFile = files[0].name;
+      const data = JSON.parse(fs.readFileSync(path.join(outputDir, latestFile), 'utf-8'));
+      res.json({
+        success: true,
+        filename: latestFile,
+        data: data
+      });
+    } else {
+      res.json({ success: false, error: '분석 결과가 없습니다' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n✅ Auto Analyzer v3.0 웹 인터페이스 실행 중`);
   console.log(`📍 http://localhost:${PORT}`);
@@ -27,6 +109,6 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`1. 위 주소를 브라우저에서 열기`);
   console.log(`2. 분석할 웹사이트 URL 입력`);
   console.log(`3. "분석 시작하기" 버튼 클릭`);
-  console.log(`4. 생성된 명령어를 새 터미널에서 실행`);
+  console.log(`4. 자동으로 분석이 진행됩니다!`);
   console.log(`\n종료: Ctrl+C\n`);
 });
