@@ -7,19 +7,55 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .item-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 5px solid #6366f1;
+        }
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .badge-excellent { background: #10b981; color: white; }
+        .badge-good { background: #3b82f6; color: white; }
+        .badge-fair { background: #f59e0b; color: white; }
+        .badge-poor { background: #ef4444; color: white; }
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #4b5563;
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
         <!-- 헤더 -->
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">
-                <i class="fas fa-chart-line text-indigo-600"></i>
+        <div class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-2xl p-8 mb-8 text-center">
+            <h1 class="text-4xl font-bold mb-2">
+                <i class="fas fa-chart-line"></i>
                 Auto Analyzer v3.0 - 분석 결과
             </h1>
-            <p class="text-lg text-gray-600">Nielsen 10대 원칙 기반 UIUX 정밀 분석</p>
+            <p class="text-lg opacity-90">Nielsen 10대 원칙 기반 UI UX 정밀 분석</p>
         </div>
 
-        <!-- 로딩 영역 -->
+        <!-- 로딩 -->
         <div id="loading" class="text-center py-20">
             <i class="fas fa-spinner fa-spin text-6xl text-indigo-600 mb-4"></i>
             <p class="text-xl text-gray-700">분석 결과를 불러오는 중...</p>
@@ -28,135 +64,115 @@
         <!-- 결과 영역 -->
         <div id="result" class="hidden">
             <!-- 종합 점수 -->
-            <div class="bg-white rounded-2xl shadow-2xl p-8 mb-8">
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
                 <div class="text-center">
-                    <div class="text-lg text-gray-600 mb-2">종합 점수</div>
-                    <div id="totalScore" class="text-7xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent mb-4">
-                        0.00
-                    </div>
-                    <div id="grade" class="inline-block px-6 py-2 bg-indigo-100 text-indigo-800 rounded-full text-xl font-bold mb-6">
-                        -
-                    </div>
-                    <div class="flex justify-center gap-8 mt-6">
-                        <div>
-                            <div class="text-sm text-gray-600 mb-1">실측률</div>
-                            <div id="measuredRate" class="text-3xl font-bold text-green-600">0%</div>
+                    <div class="text-gray-600 mb-2">종합 점수</div>
+                    <div id="totalScore" class="text-7xl font-bold text-indigo-600 mb-4">0.00</div>
+                    <div id="grade" class="inline-block px-6 py-2 bg-indigo-100 text-indigo-800 rounded-full text-xl font-bold mb-6">-</div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <div class="text-sm text-gray-600">우수 (4.5+)</div>
+                            <div id="excellentCount" class="text-3xl font-bold text-green-600">0</div>
                         </div>
-                        <div>
-                            <div class="text-sm text-gray-600 mb-1">분석 항목</div>
-                            <div id="itemCount" class="text-3xl font-bold text-indigo-600">0개</div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="text-sm text-gray-600">양호 (4.0+)</div>
+                            <div id="goodCount" class="text-3xl font-bold text-blue-600">0</div>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <div class="text-sm text-gray-600">보통 (3.0+)</div>
+                            <div id="fairCount" class="text-3xl font-bold text-yellow-600">0</div>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <div class="text-sm text-gray-600">미흡 (3.0-)</div>
+                            <div id="poorCount" class="text-3xl font-bold text-red-600">0</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 레이더 차트 -->
-            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
-                    <i class="fas fa-chart-area text-indigo-600"></i>
-                    Nielsen 10대 원칙 분석
-                </h2>
-                <div class="max-w-2xl mx-auto">
-                    <canvas id="radarChart"></canvas>
-                </div>
-            </div>
-
-            <!-- 항목별 분포 -->
-            <div class="grid md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-green-50 rounded-xl shadow-lg p-6 border-2 border-green-200">
-                    <div class="text-center">
-                        <div class="text-green-600 text-5xl mb-2">🏆</div>
-                        <div id="excellentCount" class="text-4xl font-bold text-green-600">0</div>
-                        <div class="text-gray-700 font-bold mt-2">우수 (4.5+)</div>
-                    </div>
-                </div>
-                <div class="bg-blue-50 rounded-xl shadow-lg p-6 border-2 border-blue-200">
-                    <div class="text-center">
-                        <div class="text-blue-600 text-5xl mb-2">👍</div>
-                        <div id="goodCount" class="text-4xl font-bold text-blue-600">0</div>
-                        <div class="text-gray-700 font-bold mt-2">양호 (4.0+)</div>
-                    </div>
-                </div>
-                <div class="bg-yellow-50 rounded-xl shadow-lg p-6 border-2 border-yellow-200">
-                    <div class="text-center">
-                        <div class="text-yellow-600 text-5xl mb-2">✋</div>
-                        <div id="fairCount" class="text-4xl font-bold text-yellow-600">0</div>
-                        <div class="text-gray-700 font-bold mt-2">보통 (3.0+)</div>
-                    </div>
-                </div>
-                <div class="bg-red-50 rounded-xl shadow-lg p-6 border-2 border-red-200">
-                    <div class="text-center">
-                        <div class="text-red-600 text-5xl mb-2">⚠️</div>
-                        <div id="poorCount" class="text-4xl font-bold text-red-600">0</div>
-                        <div class="text-gray-700 font-bold mt-2">미흡 (3.0-)</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 상위 5개 항목 -->
-            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                    <i class="fas fa-star text-yellow-500"></i>
-                    상위 5개 항목
-                </h2>
-                <div id="topItems" class="space-y-3">
-                    <!-- 동적 생성 -->
-                </div>
-            </div>
-
-            <!-- 하위 5개 항목 -->
-            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                    <i class="fas fa-exclamation-triangle text-red-500"></i>
-                    개선 필요 항목
-                </h2>
-                <div id="bottomItems" class="space-y-3">
-                    <!-- 동적 생성 -->
-                </div>
-            </div>
-
-            <!-- 측정 방식 -->
-            <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl shadow-lg p-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                    <i class="fas fa-microscope text-purple-600"></i>
-                    측정 방식
-                </h2>
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div class="bg-white rounded-xl p-6 shadow">
-                        <div class="text-purple-600 text-3xl mb-3">🤖</div>
-                        <div class="text-2xl font-bold text-gray-800 mb-2" id="puppeteerCount">0개</div>
-                        <div class="text-sm text-gray-600">Puppeteer 실측 (95%+)</div>
-                    </div>
-                    <div class="bg-white rounded-xl p-6 shadow">
-                        <div class="text-blue-600 text-3xl mb-3">⚡</div>
-                        <div class="text-2xl font-bold text-gray-800 mb-2" id="lighthouseCount">0개</div>
-                        <div class="text-sm text-gray-600">Lighthouse 실측 (98%)</div>
-                    </div>
-                    <div class="bg-white rounded-xl p-6 shadow">
-                        <div class="text-gray-600 text-3xl mb-3">📄</div>
-                        <div class="text-2xl font-bold text-gray-800 mb-2" id="htmlCount">0개</div>
-                        <div class="text-sm text-gray-600">HTML 분석 (75-80%)</div>
-                    </div>
-                </div>
-            </div>
+            <!-- 43개 Nielsen 항목 상세 -->
+            <div id="itemsList"></div>
         </div>
 
-        <!-- 에러 영역 -->
-        <div id="error" class="hidden">
-            <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg">
-                <div class="flex items-start gap-4">
-                    <i class="fas fa-exclamation-circle text-red-600 text-3xl"></i>
-                    <div>
-                        <h3 class="text-xl font-bold text-red-800 mb-2">분석 결과를 불러올 수 없습니다</h3>
-                        <p class="text-red-700" id="errorMessage"></p>
-                    </div>
-                </div>
-            </div>
+        <!-- 에러 -->
+        <div id="error" class="hidden bg-red-50 border-l-4 border-red-500 p-6 rounded-lg">
+            <h3 class="text-xl font-bold text-red-800 mb-2">오류 발생</h3>
+            <p class="text-red-700" id="errorMessage"></p>
         </div>
     </div>
 
     <script>
-        // URL 파라미터에서 파일명 가져오기
+        // Nielsen 항목 상세 설명 데이터
+        const itemDescriptions = {
+            'N17_3_cls_stability': {
+                title: 'CLS 안정성 (Cumulative Layout Shift)',
+                importance: '글을 읽거나 클릭하려는 내용이 갑자기 움직이면 사용자가 혼란스러워하고 잘못된 곳을 클릭하게 됩니다. 이는 매우 부정적인 사용자 경험을 제공하므로 CLS를 최소화해야 합니다.',
+                criteria: 'CLS < 0.1 (5.5점), < 0.25 (3.5점), >= 0.25 (2.5점). 이미지에 width/height 속성 지정, 웹 폰트 로딩 최적화가 필요합니다.',
+                suggestion: 'img 태그에 명시적으로 width와 height 속성을 지정하고, font-display: swap을 사용하여 폰트 로딩 시 레이아웃 이동을 방지하세요.'
+            },
+            'N1_1_status_visibility': {
+                title: '시스템 상태 가시성',
+                importance: '사용자는 현재 시스템이 어떤 상태인지, 작업이 진행 중인지 알아야 합니다. 적절한 피드백이 없으면 사용자는 불안감을 느끼고 같은 작업을 반복할 수 있습니다.',
+                criteria: '로딩 인디케이터, 진행 상태 표시, 현재 위치 표시 등이 있는지 평가합니다.',
+                suggestion: '로딩 중일 때 스피너나 프로그레스 바를 표시하고, 페이지 상단에 현재 위치를 알 수 있는 breadcrumb을 추가하세요.'
+            },
+            'N1_2_feedback_timing': {
+                title: '피드백 타이밍',
+                importance: '사용자의 행동에 대한 즉각적인 피드백이 없으면 시스템이 작동하지 않는다고 오해할 수 있습니다.',
+                criteria: '버튼 클릭, 폼 제출 등의 인터랙션 후 0.1초 이내에 시각적 피드백이 제공되는지 확인합니다.',
+                suggestion: '버튼 클릭 시 즉시 색상 변화나 로딩 상태를 표시하고, 폼 제출 시 즉각적인 확인 메시지를 보여주세요.'
+            },
+            'N1_3_action_feedback': {
+                title: '행동 피드백',
+                importance: '모든 인터랙티브 요소는 마우스 호버나 클릭 시 명확한 반응을 보여야 합니다. 그렇지 않으면 사용자는 해당 요소가 클릭 가능한지 알 수 없습니다.',
+                criteria: '모든 버튼과 링크의 호버 효과 및 클릭 피드백을 Puppeteer로 실제 테스트하여 평가합니다.',
+                suggestion: 'CSS에서 :hover와 :active 상태에 명확한 시각적 변화를 추가하세요. 예: 색상 변경, 언더라인, 그림자 효과 등.'
+            },
+            'N17_1_lcp_performance': {
+                title: 'LCP (Largest Contentful Paint)',
+                importance: '페이지의 주요 콘텐츠가 빠르게 로드되지 않으면 사용자는 사이트를 떠날 가능성이 높습니다.',
+                criteria: 'LCP < 2.5s (5.0점), 2.5~4.0s (3.0점), > 4.0s (2.0점). Lighthouse로 실측합니다.',
+                suggestion: '이미지 최적화(WebP 포맷, lazy loading), 서버 응답 시간 개선, 중요 리소스 우선 로딩을 적용하세요.'
+            },
+            'N17_2_fid_responsiveness': {
+                title: 'FID (First Input Delay)',
+                importance: '사용자가 버튼을 클릭했을 때 즉시 반응하지 않으면 사이트가 느리다고 느낍니다.',
+                criteria: 'FID < 100ms (5.0점), 100~300ms (3.0점), > 300ms (2.0점). Lighthouse로 실측합니다.',
+                suggestion: '자바스크립트 실행 시간을 줄이고, 긴 작업을 작은 청크로 분할하며, Web Worker를 활용하세요.'
+            },
+            'N17_4_tti_interactive': {
+                title: 'TTI (Time to Interactive)',
+                importance: '페이지가 완전히 인터랙티브 상태가 될 때까지 사용자는 클릭이나 입력을 할 수 없어 답답함을 느낍니다.',
+                criteria: 'TTI < 3.8s (5.0점), 3.8~7.3s (3.0점), > 7.3s (2.0점). Lighthouse로 실측합니다.',
+                suggestion: '불필요한 자바스크립트를 제거하고, 코드 스플리팅으로 초기 번들 크기를 줄이세요.'
+            },
+            'N3_3_flexible_navigation': {
+                title: '네비게이션 자유도',
+                importance: '사용자는 원하는 페이지로 자유롭게 이동할 수 있어야 합니다. 깨진 링크나 막힌 경로는 좌절감을 유발합니다.',
+                criteria: '모든 링크를 Puppeteer로 실제 클릭 테스트하여 작동 여부를 확인합니다.',
+                suggestion: '모든 링크가 올바른 페이지로 연결되는지 확인하고, 404 에러 페이지에 대안 경로를 제공하세요.'
+            },
+            'N11_1_search_autocomplete': {
+                title: '검색 자동완성',
+                importance: '검색 자동완성은 사용자가 빠르게 원하는 내용을 찾을 수 있도록 도와주며, 오타 방지에도 효과적입니다.',
+                criteria: '검색창에 입력 시 자동완성 제안이 나타나는지 Puppeteer로 실제 테스트합니다.',
+                suggestion: '검색창에 datalist나 자바스크립트 기반 자동완성 기능을 구현하세요.'
+            },
+            'N11_2_search_quality': {
+                title: '검색 결과 품질',
+                importance: '검색 기능이 있어도 결과가 부정확하거나 없으면 사용자는 원하는 정보를 찾지 못합니다.',
+                criteria: '실제 검색을 수행하여 유효한 결과가 반환되는지 Puppeteer로 확인합니다.',
+                suggestion: '검색 알고리즘을 개선하고, 관련성 높은 결과를 우선 표시하며, 결과가 없을 때 대안을 제시하세요.'
+            }
+        };
+
+        // 기본 설명 템플릿
+        const defaultDescription = {
+            importance: '이 항목은 사용자 경험에 중요한 영향을 미칩니다.',
+            criteria: 'HTML 구조, ARIA 속성, 시맨틱 태그 등을 분석하여 평가합니다.',
+            suggestion: '웹 표준과 접근성 가이드라인을 따라 개선하세요.'
+        };
+
         const urlParams = new URLSearchParams(window.location.search);
         const filename = urlParams.get('file');
 
@@ -169,9 +185,7 @@
         async function loadResult(filename) {
             try {
                 const response = await fetch(`/output/${filename}`);
-                if (!response.ok) {
-                    throw new Error(`파일을 찾을 수 없습니다: ${filename}`);
-                }
+                if (!response.ok) throw new Error(`파일을 찾을 수 없습니다: ${filename}`);
                 
                 const data = await response.json();
                 displayResult(data);
@@ -187,117 +201,123 @@
             // 종합 점수
             document.getElementById('totalScore').textContent = data.summary.totalScore.toFixed(2);
             document.getElementById('grade').textContent = data.summary.grade;
-            document.getElementById('measuredRate').textContent = data.summary.overallMeasuredRate;
-            document.getElementById('itemCount').textContent = `${data.summary.itemCount}개`;
-
-            // 항목별 분포
             document.getElementById('excellentCount').textContent = data.summary.excellentCount;
             document.getElementById('goodCount').textContent = data.summary.goodCount;
             document.getElementById('fairCount').textContent = data.summary.fairCount;
             document.getElementById('poorCount').textContent = data.summary.poorCount;
 
-            // 측정 방식
-            document.getElementById('puppeteerCount').textContent = `${data.summary.accuracyBreakdown.puppeteerMeasured}개`;
-            document.getElementById('lighthouseCount').textContent = `${data.summary.accuracyBreakdown.patternMatched}개`;
-            document.getElementById('htmlCount').textContent = `${data.summary.accuracyBreakdown.htmlOnly}개`;
-
-            // 레이더 차트
-            createRadarChart(data.scores);
-
-            // 상위/하위 항목
-            displayTopBottomItems(data.scores);
+            // 43개 항목 카드 생성
+            const sortedScores = Object.entries(data.scores).sort((a, b) => b[1] - a[1]);
+            const itemsHTML = sortedScores.map(([key, score]) => createItemCard(key, score, data)).join('');
+            document.getElementById('itemsList').innerHTML = itemsHTML;
         }
 
-        function createRadarChart(scores) {
-            // Nielsen 10대 원칙별 평균 계산
-            const principles = {
-                'N1: 시스템 상태 가시성': ['N1_1_status_visibility', 'N1_2_feedback_timing', 'N1_3_action_feedback'],
-                'N2: 현실 세계 일치': ['N2_1_familiar_terms', 'N2_2_natural_flow'],
-                'N3: 사용자 제어': ['N3_1_undo_redo', 'N3_2_emergency_exit', 'N3_3_flexible_navigation'],
-                'N4: 일관성과 표준': ['N4_1_visual_consistency', 'N4_2_terminology_consistency', 'N4_3_standard_compliance'],
-                'N5: 오류 예방': ['N5_1_input_validation', 'N5_2_confirmation_dialog', 'N5_3_constraints'],
-                'N6: 인식보다 회상': ['N6_1_visible_options', 'N6_2_recognition_cues', 'N6_3_memory_load'],
-                'N7: 유연성과 효율성': ['N7_1_accelerators', 'N7_2_personalization', 'N7_3_batch_operations'],
-                'N8: 미니멀 디자인': ['N8_1_essential_info', 'N8_2_clean_interface', 'N8_3_visual_hierarchy'],
-                'N9: 오류 복구': ['N9_1_error_messages', 'N9_2_recovery_support'],
-                'N10: 도움말': ['N10_1_help_visibility', 'N10_2_documentation']
+        function createItemCard(key, score, data) {
+            const desc = itemDescriptions[key] || { 
+                title: key.replace(/_/g, ' '),
+                importance: defaultDescription.importance,
+                criteria: defaultDescription.criteria,
+                suggestion: defaultDescription.suggestion
             };
 
-            const labels = Object.keys(principles);
-            const values = labels.map(label => {
-                const items = principles[label];
-                const sum = items.reduce((acc, item) => acc + (scores[item] || 0), 0);
-                return sum / items.length;
-            });
+            const badge = getBadge(score);
+            const measured = isMeasured(key, data);
+            const details = getDetails(key, data);
 
-            const ctx = document.getElementById('radarChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: '점수',
-                        data: values,
-                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                        borderColor: 'rgba(99, 102, 241, 1)',
-                        borderWidth: 2,
-                        pointBackgroundColor: 'rgba(99, 102, 241, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(99, 102, 241, 1)'
-                    }]
-                },
-                options: {
-                    scales: {
-                        r: {
-                            min: 0,
-                            max: 5,
-                            ticks: {
-                                stepSize: 1
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
+            return `
+                <div class="item-card">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">${desc.title}</h3>
+                            <div class="flex gap-2 items-center flex-wrap">
+                                <span class="badge ${badge.class}">${badge.text}</span>
+                                <span class="text-3xl font-bold text-indigo-600">${score.toFixed(1)}</span>
+                                <span class="text-sm text-gray-500">/ 5.0</span>
+                                ${measured ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">실측</span>' : '<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">추정</span>'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">
+                        <i class="fas fa-chart-bar text-indigo-600"></i>
+                        평가 결과
+                    </div>
+                    <div class="section-content">
+                        ${key} 점수는 <strong>${score.toFixed(1)}/5.0</strong>입니다. 
+                        ${measured ? 'Puppeteer 또는 Lighthouse를 통해 실제 브라우저에서 측정되었습니다.' : 'HTML 정적 분석을 통해 추정되었습니다.'}
+                        ${details}
+                    </div>
+
+                    <div class="section-title">
+                        <i class="fas fa-lightbulb text-yellow-500"></i>
+                        중요 이유
+                    </div>
+                    <div class="section-content">
+                        ${desc.importance}
+                    </div>
+
+                    <div class="section-title">
+                        <i class="fas fa-clipboard-check text-blue-600"></i>
+                        평가 기준
+                    </div>
+                    <div class="section-content">
+                        ${desc.criteria}
+                    </div>
+
+                    <div class="section-title">
+                        <i class="fas fa-tools text-green-600"></i>
+                        개선 제안
+                    </div>
+                    <div class="section-content">
+                        ${desc.suggestion}
+                    </div>
+                </div>
+            `;
         }
 
-        function displayTopBottomItems(scores) {
-            const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-            const top5 = sortedScores.slice(0, 5);
-            const bottom5 = sortedScores.slice(-5).reverse();
+        function getBadge(score) {
+            if (score >= 4.5) return { class: 'badge-excellent', text: '매우 좋음' };
+            if (score >= 4.0) return { class: 'badge-good', text: '좋음' };
+            if (score >= 3.0) return { class: 'badge-fair', text: '보통' };
+            return { class: 'badge-poor', text: '미흡' };
+        }
 
-            // 상위 5개
-            const topHTML = top5.map(([ key, value], index) => `
-                <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-                    <div class="flex items-center gap-4">
-                        <div class="text-2xl font-bold text-green-600">${index + 1}</div>
-                        <div>
-                            <div class="font-bold text-gray-800">${key}</div>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-green-600">${value.toFixed(1)}</div>
-                </div>
-            `).join('');
-            document.getElementById('topItems').innerHTML = topHTML;
+        function isMeasured(key, data) {
+            const measured = [
+                'N1_3_action_feedback', 'N3_2_emergency_exit', 'N3_3_flexible_navigation',
+                'N7_1_accelerators', 'N7_2_personalization', 'N7_3_batch_operations',
+                'N9_2_recovery_support', 'N11_1_search_autocomplete', 'N11_2_search_quality',
+                'N17_1_lcp_performance', 'N17_2_fid_responsiveness', 'N17_3_cls_stability', 'N17_4_tti_interactive'
+            ];
+            return measured.includes(key);
+        }
 
-            // 하위 5개
-            const bottomHTML = bottom5.map(([key, value], index) => `
-                <div class="flex items-center justify-between p-4 bg-red-50 rounded-lg">
-                    <div class="flex items-center gap-4">
-                        <div class="text-2xl font-bold text-red-600">${index + 1}</div>
-                        <div>
-                            <div class="font-bold text-gray-800">${key}</div>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-red-600">${value.toFixed(1)}</div>
-                </div>
-            `).join('');
-            document.getElementById('bottomItems').innerHTML = bottomHTML;
+        function getDetails(key, data) {
+            if (data.details && data.details.interaction) {
+                if (key === 'N1_3_action_feedback' && data.details.interaction.actionFeedback) {
+                    const d = data.details.interaction.actionFeedback.details;
+                    return `<br><br>실제 측정 결과: 총 ${d.totalButtons}개 버튼 중 호버 ${d.hoverPassed}/${d.hoverTested} (${d.hoverRate}), 클릭 ${d.clickPassed}/${d.clickTested} (${d.clickRate}) 통과.`;
+                }
+                if (key === 'N3_3_flexible_navigation' && data.details.interaction.navigationFreedom) {
+                    const d = data.details.interaction.navigationFreedom.details;
+                    return `<br><br>실제 측정 결과: 총 ${d.totalLinks}개 링크 중 ${d.workingLinks}개 작동, ${d.brokenLinks}개 비작동.`;
+                }
+            }
+            if (data.details && data.details.performance) {
+                if (key === 'N17_1_lcp_performance' && data.details.performance.lcp) {
+                    return `<br><br>Lighthouse 측정: ${data.details.performance.lcp.value.toFixed(2)}ms`;
+                }
+                if (key === 'N17_2_fid_responsiveness' && data.details.performance.fid) {
+                    return `<br><br>Lighthouse 측정: ${data.details.performance.fid.value.toFixed(2)}ms`;
+                }
+                if (key === 'N17_3_cls_stability' && data.details.performance.cls) {
+                    return `<br><br>Lighthouse 측정: ${data.details.performance.cls.value.toFixed(3)}`;
+                }
+                if (key === 'N17_4_tti_interactive' && data.details.performance.tti) {
+                    return `<br><br>Lighthouse 측정: ${(data.details.performance.tti.value / 1000).toFixed(2)}s`;
+                }
+            }
+            return '';
         }
 
         function showError(message) {
