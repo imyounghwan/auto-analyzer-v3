@@ -50,8 +50,8 @@
                 </h3>
                 <p class="text-sm text-gray-600 mb-4">
                     <i class="fas fa-info-circle text-blue-500"></i>
-                    탐색기로 식별 페이지는 <strong class="text-indigo-600">평균 15~20%p 상승</strong>합니다.<br>
-                    최소 1개 이상 입력하여 평가기간 진행합니다.
+                    직접 선별한 페이지는 <strong class="text-indigo-600">정확도가 15~20%p 상승</strong>합니다.<br>
+                    최소 1개 이상 입력하면 평가가 진행됩니다.
                 </p>
                 
                 <div class="space-y-3">
@@ -368,22 +368,34 @@
 
     <script>
         async function startAnalysis() {
-            const url = document.getElementById('urlInput').value.trim();
+            // 평가 대상 페이지 수집
+            const pages = [];
+            for (let i = 1; i <= 10; i++) {
+                const pageInput = document.getElementById(`page${i}`);
+                if (pageInput && pageInput.value.trim()) {
+                    pages.push(pageInput.value.trim());
+                }
+            }
+
+            // 메인 페이지 (page1)는 필수
+            const page1 = document.getElementById('page1').value.trim();
+            if (!page1) {
+                alert('메인 페이지 URL을 입력해주세요! (1번 필수)');
+                return;
+            }
+
+            // URL 유효성 검사 (page1)
+            try {
+                new URL(page1);
+            } catch (e) {
+                alert('메인 페이지 URL 형식이 올바르지 않습니다!\n예시: https://www.example.com');
+                return;
+            }
+
+            // urlInput은 사용 안 함, page1 사용
+            const finalUrl = page1;
             const pdfOption = document.getElementById('pdfOption').checked;
             const noCacheOption = document.getElementById('noCacheOption').checked;
-
-            if (!url) {
-                alert('URL을 입력해주세요!');
-                return;
-            }
-
-            // URL 유효성 검사
-            try {
-                new URL(url);
-            } catch (e) {
-                alert('올바른 URL 형식이 아닙니다!\n예시: https://www.example.com');
-                return;
-            }
 
             // 진행 상태 표시
             document.getElementById('progressSection').classList.remove('hidden');
@@ -403,7 +415,8 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        url: url,
+                        url: finalUrl,
+                        pages: pages.length > 0 ? pages : [finalUrl],
                         pdf: pdfOption,
                         noCache: noCacheOption
                     })
