@@ -2,7 +2,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { exec } from 'child_process';
+import { spawn } from 'child_process';
 import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -51,34 +51,47 @@ app.post('/api/analyze', (req, res) => {
     }
   }
 
-  // Build command
-  let command = `cd ${__dirname} && npm start -- analyze --url "${url}"`;
+  // Build CLI arguments
+  const args = ['start', '--', 'analyze', '--url', url];
   
-  // Add pages parameter if provided
+  // Add pages parameter if provided (use temp file for Windows compatibility)
   if (pages && pages.length > 0) {
-    // pages 배열을 임시 파일로 저장 (shell escaping 문제 해결)
     const tmpFile = path.join(__dirname, '.pages.tmp.json');
     fs.writeFileSync(tmpFile, JSON.stringify(pages), 'utf-8');
-    command += ` --pages "$(cat ${tmpFile})"`;
+    args.push('--pages-file', tmpFile);
     console.log(`📄 평가 대상 페이지 ${pages.length}개:`);
     pages.forEach((p, i) => console.log(`   ${i+1}. ${p}`));
   }
   
-  if (pdf) command += ' --pdf';
-  if (noCache) command += ' --no-cache';
+  if (pdf) args.push('--pdf');
+  if (noCache) args.push('--no-cache');
 
   console.log(`\n🚀 분석 시작: ${url}`);
-  console.log(`📝 명령어: ${command}\n`);
+  console.log(`📝 명령어: npm ${args.join(' ')}\n`);
 
-  // Execute analysis in background (don't wait for callback)
-  exec(command, { maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`❌ 분석 실패:`, error.message);
-    } else {
-      // Extract filename from stdout
-      const match = stdout.match(/output\/(analysis-[^.]+\.json)/);
+  // Execute analysis using spawn (Windows 호환)
+  const child = spawn('npm', args, {
+    cwd: __dirname,
+    shell: true,
+    stdio: 'pipe'
+  });
+
+  let outputBuffer = '';
+  child.stdout.on('data', (data) => {
+    outputBuffer += data.toString();
+  });
+
+  child.stderr.on('data', (data) => {
+    console.error(data.toString());
+  });
+
+  child.on('close', (code) => {
+    if (code === 0) {
+      const match = outputBuffer.match(/output[\/\\](analysis-[^.]+\.json)/);
       const filename = match ? match[1] : null;
       console.log(`✅ 분석 완료: ${filename}\n`);
+    } else {
+      console.error(`❌ 분석 실패: exit code ${code}\n`);
     }
   });
 

@@ -21,6 +21,7 @@ program
   .option('--no-cache', '캐시 사용 안 함 (항상 새로 분석)')
   .option('--pdf', 'PDF 리포트 생성')
   .option('-p, --pages <json>', '평가 대상 페이지 목록 (JSON 배열)')
+  .option('--pages-file <path>', '평가 대상 페이지 파일 경로 (JSON 파일)')
   .action(async (options) => {
     try {
       console.log('\n' + '='.repeat(70));
@@ -29,9 +30,25 @@ program
       console.log(`📍 URL: ${options.url}`);
       console.log(`💾 캐시: ${options.cache ? '사용 (1시간)' : '사용 안 함'}`);
       
-      // Parse pages parameter
+      // Parse pages parameter (from file or direct JSON)
       let targetPages = [options.url];
-      if (options.pages) {
+      
+      // 1. 파일에서 읽기 (우선순위)
+      if (options.pagesFile) {
+        try {
+          const fileContent = fs.readFileSync(options.pagesFile, 'utf-8');
+          const parsed = JSON.parse(fileContent);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            targetPages = parsed;
+            console.log(`📄 평가 대상 페이지 (파일): ${targetPages.length}개`);
+            targetPages.forEach((p, i) => console.log(`   ${i+1}. ${p}`));
+          }
+        } catch (e) {
+          console.warn(`⚠️  pages-file 읽기 실패: ${e.message}`);
+        }
+      }
+      // 2. 직접 JSON 전달
+      else if (options.pages) {
         try {
           const parsed = JSON.parse(options.pages);
           if (Array.isArray(parsed) && parsed.length > 0) {
