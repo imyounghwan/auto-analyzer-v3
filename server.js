@@ -41,31 +41,19 @@ app.post('/api/analyze', (req, res) => {
   console.log(`\n🚀 분석 시작: ${url}`);
   console.log(`📝 명령어: ${command}\n`);
 
-  // Execute analysis
-  const child = exec(command, { maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
+  // Execute analysis in background (don't wait for callback)
+  exec(command, { maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
     if (error) {
       console.error(`❌ 분석 실패:`, error.message);
-      return res.status(500).json({ 
-        success: false, 
-        error: error.message,
-        stderr: stderr
-      });
+    } else {
+      // Extract filename from stdout
+      const match = stdout.match(/output\/(analysis-[^.]+\.json)/);
+      const filename = match ? match[1] : null;
+      console.log(`✅ 분석 완료: ${filename}\n`);
     }
-
-    // Extract filename from stdout
-    const match = stdout.match(/output\/(analysis-[^.]+\.json)/);
-    const filename = match ? match[1] : null;
-
-    console.log(`✅ 분석 완료: ${filename}\n`);
-
-    res.json({
-      success: true,
-      filename: filename,
-      stdout: stdout
-    });
   });
 
-  // Send immediate response with job started
+  // Send immediate response - analysis will continue in background
   res.json({
     success: true,
     message: '분석이 시작되었습니다. 잠시만 기다려주세요...',
