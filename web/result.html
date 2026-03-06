@@ -562,7 +562,7 @@
         }
         
         function displayScores(data) {
-            const overall = data.totalScore || 0;
+            const overall = data.summary?.totalScore || data.totalScore || 0;
             document.getElementById('totalScore').textContent = overall.toFixed(2);
             
             // 편의성/디자인 점수는 v3에서는 아직 분리되지 않았으므로 임시로 같은 값 사용
@@ -589,15 +589,15 @@
         }
         
         function displaySummary(data) {
-            const grade = data.grade || 'B';
+            const grade = data.summary?.grade || data.grade || 'B';
             const html = `
                 <div class="section-card">
                     <div style="font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                         <span style="font-size: 28px;">📋</span> 종합 평가 총평
                     </div>
                     <div style="font-size: 16px; color: #D1D5DB; line-height: 2; padding: 20px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);">
-                        전체 ${data.summary.total_items}개 항목 중 ${data.summary.measured_items}개 항목을 실측하여 종합 점수 ${data.totalScore.toFixed(2)}/5.0 (등급: ${grade})을 기록했습니다.<br><br>
-                        <strong>우수:</strong> ${data.summary.excellent}개, <strong>양호:</strong> ${data.summary.good}개, <strong>보통:</strong> ${data.summary.fair}개, <strong>미흡:</strong> ${data.summary.poor}개
+                        전체 ${data.summary?.itemCount || 43}개 항목 중 ${data.summary?.puppeteerMeasured || 0}개 항목을 실측하여 종합 점수 ${(data.summary?.totalScore || data.totalScore || 0).toFixed(2)}/5.0 (등급: ${grade})을 기록했습니다.<br><br>
+                        <strong>우수:</strong> ${data.summary?.excellentCount || 0}개, <strong>양호:</strong> ${data.summary?.goodCount || 0}개, <strong>보통:</strong> ${data.summary?.fairCount || 0}개, <strong>미흡:</strong> ${data.summary?.poorCount || 0}개
                     </div>
                 </div>
             `;
