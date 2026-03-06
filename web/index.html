@@ -42,6 +42,101 @@
                 </p>
             </div>
 
+            <!-- 평가 대상 페이지 입력 (1-10개) -->
+            <div class="mb-8 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-indigo-200">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
+                    <i class="fas fa-th-list text-indigo-600"></i>
+                    평가 대상 페이지 입력 (1~10개)
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    <i class="fas fa-info-circle text-blue-500"></i>
+                    탐색기로 식별 페이지는 <strong class="text-indigo-600">평균 15~20%p 상승</strong>합니다.<br>
+                    최소 1개 이상 입력하여 평가기간 진행합니다.
+                </p>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">
+                            <i class="fas fa-home text-blue-600"></i> 1. 메인 페이지 <span class="text-red-500">*필수</span>
+                        </label>
+                        <input type="url" id="page1" placeholder="https://example.com" 
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">
+                            <i class="fas fa-search text-cyan-600"></i> 2. 검색 결과 페이지
+                        </label>
+                        <input type="url" id="page2" placeholder="검색창에 키워드 입력 후 결과 페이지" 
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">
+                            <i class="fas fa-sign-in-alt text-purple-600"></i> 3. 로그인 페이지
+                        </label>
+                        <input type="url" id="page3" placeholder="로그인/회원가입 페이지" 
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">
+                            <i class="fas fa-th-large text-orange-600"></i> 4. 게시판 목록 페이지
+                        </label>
+                        <input type="url" id="page4" placeholder="공지사항, 자료실 등" 
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">
+                            <i class="fas fa-file-alt text-blue-600"></i> 5. 게시판 상세 페이지
+                        </label>
+                        <input type="url" id="page5" placeholder="게시글 보기 페이지" 
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">
+                            <i class="fas fa-bullhorn text-green-600"></i> 6. 홍보적 페이지
+                        </label>
+                        <input type="url" id="page6" placeholder="민원신청, 본약이지 않" 
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">
+                            <i class="fas fa-question-circle text-teal-600"></i> 7. FAQ/은콘텐츠 페이지
+                        </label>
+                        <input type="url" id="page7" placeholder="자주 묻는 질문, 도움말" 
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">
+                            <i class="fas fa-sitemap text-purple-600"></i> 8. 사이트맵, 웹사 등
+                        </label>
+                        <input type="url" id="page8" placeholder="사이트맵, 웹사스 등" 
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">
+                            <i class="fas fa-envelope text-indigo-600"></i> 9. 연락처/문의 페이지
+                        </label>
+                        <input type="url" id="page9" placeholder="언락, 회의양식 포함" 
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i> 10. 에러 페이지 (선택)
+                        </label>
+                        <input type="url" id="page10" placeholder="404 페이지 등 (선택)" 
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none">
+                    </div>
+                </div>
+            </div>
+
             <!-- 옵션 섹션 -->
             <div class="mb-8 p-6 bg-gray-50 rounded-xl">
                 <h3 class="text-lg font-bold text-gray-700 mb-4">
