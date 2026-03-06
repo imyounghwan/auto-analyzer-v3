@@ -4,16 +4,17 @@
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-**버튼 클릭 한 번으로 전체 웹사이트 UIUX를 정밀 분석하는 완전 자동화 도구**
+**버튼 클릭 한 번으로 한 사이트의 여러 페이지를 동시에 정밀 분석하는 완전 자동화 도구**
 
 ---
 
 ## ✨ 주요 특징
 
-### 🎯 완전 자동화
-- **버튼 클릭 한 번**으로 모든 분석 자동 실행
-- **터미널 작업 불필요** - 웹 UI에서 모든 작업 완료
-- **자동 결과 표시** - 분석 완료 시 자동으로 결과 페이지 이동
+### 🎯 다중 페이지 동시 분석 (v3.0 신기능!)
+- **1~10개 페이지 동시 분석** - 같은 사이트의 여러 페이지를 한 번에 평가
+- **페이지 타입 자동 인식** - main/search/login/board/faq 등 자동 감지
+- **항목별 최적 매핑** - 페이지 특성에 맞는 평가 항목 자동 선택
+- **도메인 검증** - 같은 사이트만 입력 가능 (프론트+백엔드 이중 검증)
 
 ### 🔬 실제 브라우저 측정
 - **13개 항목 실측** (30.2% 정확도)
@@ -28,117 +29,116 @@
 - **등급 산출** (A+ ~ F)
 - **레이더 차트 시각화**
 
-### 📄 v2 스타일 결과 페이지
-- **JSON 결과 파일** - 전체 분석 데이터
-- **PDF 리포트** - 차트, 그래프, 상세 점수표
-- **웹 결과 페이지 (v2 스타일 완전 복원)** ✨
-  - 📄 **분석된 페이지 목록** - 메인 + 서브 페이지
-  - 📊 **편의성/디자인 분리 표시** - 각각 별도 섹션
-  - 📋 **종합 평가 총평** - 전체 요약 및 분포
-  - ✏️ **항목별 점수 수정** - 즉시 반영 + localStorage 저장
-  - 📥 **PDF/PPT 다운로드 버튼**
-  - 🇰🇷 **한글 항목명** - N1_1 → "시스템 상태 가시성"
+---
+
+## 🎯 평가 대상 페이지 입력 가이드
+
+### ⚠️ 중요: 같은 사이트만 입력 가능
+**반드시 같은 도메인의 여러 페이지만 입력하세요!**
+- ✅ 올바른 예: `naver.com/main`, `naver.com/search`, `naver.com/login`
+- ❌ 잘못된 예: `naver.com`, `google.com`, `daum.net` (서로 다른 사이트)
+
+### 페이지 입력 순서 (1~10개)
+1. **메인 페이지** (필수) - 사이트 홈페이지
+2. **검색 결과 페이지** - 키워드 입력 후 결과 페이지
+3. **로그인 페이지** - 로그인/회원가입 페이지
+4. **게시판 목록** - 공지사항, 자료실 등
+5. **게시판 상세** - 게시글 보기 페이지
+6. **홍보적 페이지** - 회사소개, 제품소개 등
+7. **FAQ/도움말** - 자주 묻는 질문, 도움말 페이지
+8. **사이트맵** - 전체 메뉴 구조
+9. **문의 페이지** - 연락처, 문의 양식
+10. **에러 페이지** - 404 페이지 등
+
+### 페이지 타입별 측정 항목
+
+| 페이지 타입 | 측정 항목 (예시) | 항목 수 |
+|----------|---------------|-------|
+| **메인 페이지** | N1_3(action feedback), N3_2(emergency exit), N3_3(navigation), N7_1(accelerators), N7_3(batch operations) | 5개 |
+| **검색 페이지** | N11_1(search autocomplete), N11_2(search quality), N3_3(flexible navigation) | 3개 |
+| **로그인 페이지** | N5_1(input validation), N9_1(error messages), N9_2(recovery support), N1_3(action feedback) | 4개 |
+| **게시판 목록** | N3_3(flexible navigation), N6_1(visible options), N7_3(batch operations) | 3개 |
+| **게시판 상세** | N3_2(emergency exit), N8_1(essential info), N1_3(action feedback) | 3개 |
+| **FAQ** | N10_1(help visibility), N11_1(search autocomplete), N3_2(emergency exit) | 3개 |
 
 ---
 
-## 🚀 빠른 시작
+## 🚀 시작하기
 
-### 1️⃣ 다운로드 & 설치
+### 📥 설치 (Windows)
 
-```bash
-# 다운로드
-wget https://www.genspark.ai/api/files/s/VIOrRvJZ -O auto-analyzer-v3.tar.gz
+1. **다운로드**: https://www.genspark.ai/api/files/s/xTiZLqSb
+2. **압축 해제**: `auto-analyzer-v3-같은도메인검증완성.tar.gz` 파일 압축 해제
+3. **폴더 이동**: `home\user\auto-analyzer-v3` 폴더로 이동
+4. **의존성 설치**:
+   ```bash
+   npm install
+   ```
+5. **Chrome 설치 확인**: Chrome 브라우저가 설치되어 있어야 함
 
-# 압축 해제
-tar -xzf auto-analyzer-v3.tar.gz
-cd home/user/auto-analyzer-v3
-
-# 의존성 설치 (2-3분 소요)
-npm install
-
-# Chrome 설치 (Ubuntu/Debian)
-sudo apt-get update
-sudo apt-get install -y google-chrome-stable
-
-# 또는 제공된 스크립트 사용
-chmod +x install-chrome.sh && ./install-chrome.sh
-```
-
-### 2️⃣ 웹 서버 시작
+### ▶️ 실행
 
 ```bash
 npm run web
 ```
 
-**성공 출력:**
-```
-✅ Auto Analyzer v3.0 웹 인터페이스 실행 중
-📍 http://localhost:3000
-```
+브라우저에서 http://localhost:3000 접속
 
-### 3️⃣ 브라우저에서 분석
+### 📝 사용 방법
 
-1. **브라우저 열기**: `http://localhost:3000`
-2. **URL 입력**: 분석할 웹사이트 주소 (예: `https://www.naver.com`)
-3. **옵션 선택**: PDF 리포트 생성 체크
-4. **분석 시작** 버튼 클릭! 🎬
-5. **자동 완료**: 30-40초 후 자동으로 결과 페이지 표시! ✅
+1. **페이지 입력**
+   - 1번(메인 페이지): 필수 입력
+   - 2~10번: 선택 입력 (검색, 로그인, 게시판 등)
+   - ⚠️ **반드시 같은 도메인만** 입력
 
-**더 이상 터미널 작업이나 명령어 실행 불필요!**
+2. **옵션 설정**
+   - PDF 리포트 생성 (선택)
+   - 캐시 사용 안 함 (선택)
 
----
+3. **분석 시작**
+   - "분석 시작하기" 버튼 클릭
+   - 30~90초 대기 (페이지 수에 따라 다름)
 
-## 📊 실제 테스트 결과
-
-### 테스트 케이스 1: example.com
-- **분석 시간**: 35초
-- **종합 점수**: 3.35/5.0 (B)
-- **실측률**: 30.2% (13/43)
-- **항목 분포**: 우수 4개, 양호 4개, 보통 26개, 미흡 9개
-- **Top 3**: LCP 5.0, FID 5.0, CLS 5.0
-
-### 테스트 케이스 2: google.com
-- **분석 시간**: 45초
-- **종합 점수**: 3.16/5.0 (B)
-- **실측률**: 30.2% (13/43)
-- **항목 분포**: 우수 4개, 양호 3개, 보통 28개, 미흡 8개
-- **개선 필요**: 검색 자동완성 2.0, 개인화 2.0
-
-### 테스트 케이스 3: naver.com (추정)
-- **예상 분석 시간**: ~90초
-- **예상 점수**: 3.5-4.0/5.0 (B+)
-- **특징**: 복잡한 구조, 많은 인터랙션 요소
+4. **결과 확인**
+   - 자동으로 결과 페이지 이동
+   - 점수 수정 가능 (클릭하여 0.0~5.0 입력)
+   - PDF/PPT 다운로드 버튼 (향후 지원)
 
 ---
 
-## 🔬 측정 방식 상세
+## 📊 테스트 결과
 
-### Puppeteer 실측 (9개 항목) - 정확도 95%+
-| 항목 | 측정 내용 | 예시 |
-|------|----------|------|
-| **N1_3** | 모든 버튼 호버/클릭 반응 테스트 | 140개 요소 중 89개 호버 통과 (63.6%) |
-| **N3_2** | 모달 닫기 버튼 + ESC 키 작동 | 모든 모달 창 ESC 키 테스트 |
-| **N3_3** | 모든 링크 실제 클릭 테스트 | 150개 링크 중 145개 작동 (96.7%) |
-| **N7_1** | 단축키 실제 작동 검증 | Ctrl+K, Alt+S 등 실제 실행 |
-| **N7_2** | 설정 변경 기능 테스트 | 다크모드, 폰트 크기 변경 테스트 |
-| **N7_3** | 전체 선택 체크박스 작동 | "모두 선택" 체크박스 클릭 검증 |
-| **N9_2** | 에러 복구 기능 검증 | 취소, 되돌리기 버튼 테스트 |
-| **N11_1** | 검색 자동완성 테스트 | 검색창에 "te" 입력 → 제안 확인 |
-| **N11_2** | 검색 실행 후 결과 확인 | "test" 검색 → 결과 개수 확인 |
+### 단일 페이지 테스트
+- **URL**: https://example.com
+- **시간**: ~35초
+- **점수**: 3.35/5.0 (B)
+- **측정 항목**: 5개
 
-### Lighthouse 실측 (4개 항목) - 정확도 98%
-| 항목 | 측정 내용 | 기준 |
-|------|----------|------|
-| **N17_1** | LCP (페이지 로딩 속도) | < 2.5s → 5.0점 |
-| **N17_2** | FID (첫 입력 반응 속도) | < 100ms → 5.0점 |
-| **N17_3** | CLS (레이아웃 안정성) | < 0.1 → 5.0점 |
-| **N17_4** | TTI (인터랙티브 준비 시간) | < 3.8s → 5.0점 |
+### 다중 페이지 테스트 (3페이지)
+- **URL**: https://example.com + 2개 서브페이지
+- **시간**: ~60초
+- **점수**: 3.50/5.0 (B+)
+- **페이지**:
+  1. https://example.com (main) - 5개 항목
+  2. https://example.com/page2 (search) - 3개 항목
+  3. https://example.com/login (login) - 4개 항목
+- **총 측정 항목**: 12개
 
-### HTML 분석 (30개 항목) - 정확도 75-80%
-- 구조 분석: 제목, 링크, 폼, 이미지 등
-- 접근성: ARIA, 키보드 접근성, 색상 대비
-- 의미론: 시맨틱 태그, 메타 데이터
-- 표준 준수: HTML5, WCAG 2.1
+---
+
+## 🔧 기술 스택
+
+### Backend
+- **Node.js** v18+ (ESM)
+- **Express** 4.x - Web server
+- **Puppeteer** 23.x - Browser automation
+- **Lighthouse** 12.x - Performance analysis
+- **Cheerio** 1.x - HTML parsing
+
+### Frontend
+- **TailwindCSS** 3.x - Styling
+- **Chart.js** 4.x - Radar chart visualization
+- **Vanilla JavaScript** - No framework
 
 ---
 
@@ -146,216 +146,98 @@ npm run web
 
 ```
 auto-analyzer-v3/
-├── src/                           # 소스 코드
-│   ├── index.js                  # CLI 진입점
-│   ├── analyzers/                # 분석 모듈
-│   │   ├── htmlAnalyzer.js       # HTML 정적 분석
-│   │   ├── interactionAnalyzer.js # Puppeteer 인터랙션 테스트
-│   │   ├── performanceAnalyzer.js # Lighthouse 성능 측정
-│   │   └── nielsenEvaluator.js   # Nielsen 점수 계산
-│   ├── core/                     # 핵심 로직
-│   └── reporters/                # 리포트 생성
-│
-├── web/                          # 웹 인터페이스
-│   ├── index.html               # 메인 페이지 (분석 입력)
-│   ├── result.html              # 결과 페이지
-│   └── download.html            # 다운로드 안내
-│
-├── output/                       # 분석 결과 저장 (자동 생성)
-│   ├── analysis-*.json          # JSON 결과
-│   └── report-*.pdf             # PDF 리포트
-│
-├── server.js                     # 웹 서버 (Express)
-├── package.json                  # 프로젝트 설정
-├── README.md                     # 이 파일
-├── 사용설명서.md                 # 상세 가이드 (한글)
-└── USER_GUIDE.md                # User Guide (English)
+├── src/
+│   ├── index.js                    # CLI entry point
+│   ├── core/
+│   │   ├── integrator.js           # Main analysis orchestrator (MULTI-PAGE)
+│   │   ├── browser.js              # Puppeteer browser launch
+│   │   ├── cache.js                # Cache management
+│   │   └── pageTypeMapping.js      # Page type inference & item mapping
+│   ├── analyzers/
+│   │   ├── htmlAnalyzer.js         # HTML structure & accessibility
+│   │   ├── interactionAnalyzer.js  # Puppeteer interaction tests
+│   │   ├── performanceAnalyzer.js  # Lighthouse performance
+│   │   └── nielsenEvaluator.js     # Nielsen score calculation
+│   └── reporters/
+│       └── pdfGenerator.js         # PDF report generation
+├── web/
+│   ├── index.html                  # Web UI (multi-page input)
+│   └── result.html                 # Result page (v2 style)
+├── output/                         # Analysis results (JSON)
+├── server.js                       # Express web server (domain validation)
+├── package.json
+└── README.md
 ```
 
 ---
 
-## ⚙️ 사용 방법
+## 🎯 개발 로드맵
 
-### 방법 1: 웹 UI (권장 ⭐)
+- ✅ **v3.0**: 다중 페이지 분석 완성 (2026-03-06)
+  - 1~10개 페이지 동시 분석
+  - 페이지 타입 자동 인식
+  - 도메인 검증 (프론트+백엔드)
+  - v2 스타일 UI 복원
 
-```bash
-# 1. 웹 서버 시작
-npm run web
+- 🔜 **v3.1**: PDF 리포트 생성
+  - 레이더 차트 + 상세 분석
+  - 페이지별 상세 리포트
+  - 개선 제안 포함
 
-# 2. 브라우저에서 http://localhost:3000 열기
+- 🔜 **v3.2**: PPT 리포트 생성
+  - 경영진 보고용 프레젠테이션
+  - 요약 + 핵심 지표
 
-# 3. URL 입력 → "분석 시작하기" 버튼 클릭
-
-# 4. 자동 완료! (30-40초 대기)
-```
-
-### 방법 2: CLI (고급 사용자용)
-
-```bash
-# JSON만 생성
-npm start -- analyze --url https://www.example.com
-
-# PDF 포함
-npm start -- analyze --url https://www.example.com --pdf
-
-# 캐시 사용 안 함 (항상 새로 분석)
-npm start -- analyze --url https://www.example.com --pdf --no-cache
-
-# 결과 확인
-cd output
-ls -lht
-```
-
----
-
-## 📊 결과 확인
-
-### 1️⃣ 웹 브라우저 (자동)
-분석 완료 시 **자동으로 결과 페이지 표시**
-- 레이더 차트
-- 종합 점수 및 등급
-- 43개 항목 상세 점수
-- 상위/하위 5개 항목
-- 측정 방식 설명
-
-### 2️⃣ PDF 리포트
-`output/report-*.pdf` 파일 열기
-- 종합 점수 대시보드
-- Nielsen 10대 원칙 레이더 차트
-- 43개 항목 상세 점수표
-- Lighthouse 성능 지표
-- 개선 권장사항
-
-### 3️⃣ JSON 데이터
-`output/analysis-*.json` 파일
-- 전체 분석 데이터
-- API 연동용 원본 데이터
-- 커스텀 분석 가능
-
----
-
-## 🆚 버전 비교
-
-| 항목 | v2 (webapp) | **v3 (auto-analyzer)** |
-|------|-------------|----------------------|
-| **실측 항목** | 0개 (0%) | **13개 (30.2%)** ✅ |
-| **분석 방식** | HTML만 (Cheerio) | **Chrome + Puppeteer + Lighthouse** ✅ |
-| **정확도** | 추정 (75-80%) | **실측 30.2% + 추정 69.8%** ✅ |
-| **분석 시간** | ~2초 | 30-90초 |
-| **신뢰도** | 낮음 | **높음** ✅ |
-| **PDF 생성** | ❌ | ✅ |
-| **웹 UI** | ✅ | ✅ |
-| **자동화** | 수동 | **완전 자동** ✅ |
-
-**결론**: v3는 **실제 브라우저 테스트**로 정확도가 크게 향상되었으며, **완전 자동화**로 사용성도 개선되었습니다.
-
----
-
-## 🐛 문제 해결
-
-### 문제 1: 포트 3000 사용 중
-```bash
-fuser -k 3000/tcp
-npm run web
-```
-
-### 문제 2: Chrome 없음
-```bash
-sudo apt-get install -y google-chrome-stable
-# 또는
-./install-chrome.sh
-```
-
-### 문제 3: 분석이 멈춤
-```bash
-# Chrome 프로세스 종료
-pkill -9 chrome
-# 웹 서버 재시작
-npm run web
-```
-
-### 문제 4: npm install 실패
-```bash
-sudo chown -R $USER:$USER .
-npm install
-```
-
----
-
-## 💡 팁 & 활용 사례
-
-### 💡 활용 팁
-1. **캐시 활용**: 1시간 이내 재분석 시 캐시 사용 → 2초 완료
-2. **정기 모니터링**: 매월 자사 사이트 분석 → 개선 추이 확인
-3. **경쟁사 분석**: 여러 사이트 비교 분석
-4. **PDF 공유**: 리포트를 프레젠테이션/회의에 활용
-
-### 🎯 활용 사례
-- **UX 개선 프로젝트**: 현재 상태 진단 → 개선 후 재측정
-- **경쟁사 벤치마킹**: 경쟁사와 점수 비교 → 개선 방향 도출
-- **정기 품질 관리**: 월간/분기별 UIUX 품질 모니터링
-- **리뉴얼 전후 비교**: 리뉴얼 효과 정량적 측정
-
----
-
-## 📦 시스템 요구사항
-
-### 최소 사양
-- **OS**: Linux, macOS, Windows (WSL)
-- **Node.js**: v18.0.0 이상
-- **Chrome**: Stable 버전
-- **RAM**: 2GB 이상
-- **디스크**: 500MB 이상
-
-### 권장 사양
-- **OS**: Ubuntu 20.04 LTS 이상
-- **Node.js**: v20.0.0 이상
-- **RAM**: 4GB 이상
-- **디스크**: 1GB 이상
-
----
-
-## 🔗 링크
-
-- **다운로드**: https://www.genspark.ai/api/files/s/4miIRE9h
-- **GitHub**: https://github.com/imyounghwan/auto-analyzer-v3
-- **Issues**: https://github.com/imyounghwan/auto-analyzer-v3/issues
+- 🔜 **v4.0**: AI 기반 개선 제안
+  - GPT-4 기반 상세 분석
+  - 코드 레벨 개선 제안
+  - 우선순위 제안
 
 ---
 
 ## 📄 라이선스
 
-MIT License - 자유롭게 사용, 수정, 배포 가능
+MIT License
 
 ---
 
-## 👨‍💻 제작
+## 👤 개발자
 
-**MGINE** - UIUX 분석 전문 솔루션
-
-**문의**: GitHub Issues 또는 이메일
-
----
-
-## ✅ 체크리스트
-
-### 설치 완료 확인
-- [ ] Node.js v18+ 설치 (`node --version`)
-- [ ] Chrome 설치 (`google-chrome --version`)
-- [ ] `npm install` 성공
-- [ ] `npm run web` 실행 가능
-- [ ] `http://localhost:3000` 열림
-
-### 분석 완료 확인
-- [ ] URL 입력 완료
-- [ ] "분석 시작하기" 버튼 클릭
-- [ ] 진행 상태 바 표시
-- [ ] 자동으로 결과 페이지 표시
-- [ ] `output/` 폴더에 JSON 파일 생성
-- [ ] `output/` 폴더에 PDF 파일 생성
+- **GitHub**: https://github.com/imyounghwan/auto-analyzer-v3
+- **Version**: 3.0.0
+- **Last Updated**: 2026-03-06
 
 ---
 
-**🎉 이제 완벽하게 사용할 수 있습니다!**
+## 🆘 문제 해결
 
-**문제가 있으면 GitHub Issues에 문의하세요.**
+### Q1. "분석이 시작되지 않습니다"
+- 메인 페이지(1번)가 입력되어 있는지 확인
+- 모든 페이지가 같은 도메인인지 확인
+- Chrome 브라우저가 설치되어 있는지 확인
+
+### Q2. "서로 다른 사이트를 입력할 수 없습니다" 에러
+- 같은 도메인의 페이지만 입력하세요
+- 예: `naver.com/main`, `naver.com/search` (✅)
+- 잘못된 예: `naver.com`, `google.com` (❌)
+
+### Q3. "분석 시간이 너무 오래 걸립니다"
+- 페이지 수에 따라 30초~90초 소요
+- 1페이지: ~35초
+- 3페이지: ~60초
+- 10페이지: ~90초
+
+### Q4. "점수를 수정하고 싶습니다"
+- 결과 페이지에서 각 항목의 "수정" 버튼 클릭
+- 0.0~5.0 사이 값 입력
+- 자동으로 전체 점수 재계산
+
+---
+
+## 🙏 기여
+
+이슈 및 PR 환영합니다!
+
+---
+
+**Auto Analyzer v3.0** - 누구나 쉽게 사용하는 Nielsen UIUX 정밀 분석 도구 🚀
