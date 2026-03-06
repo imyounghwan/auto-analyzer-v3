@@ -605,8 +605,26 @@
         }
         
         function displayItems(data) {
-            const convenienceHTML = renderItems(data.items, 'convenience');
-            const designHTML = renderItems(data.items.slice(0, 5), 'design'); // 임시로 처음 5개를 디자인으로
+            // v3 JSON: scores 객체를 items 배열로 변환
+            const items = [];
+            if (data.scores) {
+                for (const [itemId, score] of Object.entries(data.scores)) {
+                    items.push({
+                        itemId: itemId,
+                        score: score,
+                        method: 'measured', // 임시
+                        accuracy: 95,
+                        result: '진단 결과 없음'
+                    });
+                }
+            }
+            
+            // 편의성/디자인 분리 (임시로 처음 37개는 편의성, 나머지는 디자인)
+            const convenienceItems = items.slice(0, 37);
+            const designItems = items.slice(37);
+            
+            const convenienceHTML = renderItems(convenienceItems, 'convenience');
+            const designHTML = renderItems(designItems, 'design');
             
             document.getElementById('convenienceItems').innerHTML = convenienceHTML;
             document.getElementById('designItems').innerHTML = designHTML;
