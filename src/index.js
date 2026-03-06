@@ -116,22 +116,32 @@ program
       
       // 상위 5개 점수 출력
       const sortedScores = Object.entries(result.scores)
-        .sort(([, a], [, b]) => b - a)
+        .sort(([, a], [, b]) => {
+          const aScore = typeof a === 'object' ? a.score : a;
+          const bScore = typeof b === 'object' ? b.score : b;
+          return bScore - aScore;
+        })
         .slice(0, 5);
       
       console.log('🏆 상위 5개 항목:');
       sortedScores.forEach(([key, value], index) => {
-        console.log(`  ${index + 1}. ${key}: ${value.toFixed(1)}/5.0`);
+        const score = typeof value === 'object' ? value.score : value;
+        console.log(`  ${index + 1}. ${key}: ${score.toFixed(1)}/5.0`);
       });
       
       // 하위 5개 점수 출력
       const bottomScores = Object.entries(result.scores)
-        .sort(([, a], [, b]) => a - b)
+        .sort(([, a], [, b]) => {
+          const aScore = typeof a === 'object' ? a.score : a;
+          const bScore = typeof b === 'object' ? b.score : b;
+          return aScore - bScore;
+        })
         .slice(0, 5);
       
       console.log('\n⚠️  개선 필요 항목:');
       bottomScores.forEach(([key, value], index) => {
-        console.log(`  ${index + 1}. ${key}: ${value.toFixed(1)}/5.0`);
+        const score = typeof value === 'object' ? value.score : value;
+        console.log(`  ${index + 1}. ${key}: ${score.toFixed(1)}/5.0`);
       });
       
       console.log('');

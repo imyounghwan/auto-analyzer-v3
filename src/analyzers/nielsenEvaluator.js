@@ -1,4 +1,5 @@
 // src/analyzers/nielsenEvaluator.js - COMPLETE VERSION
+import { getItemDetails } from '../config/itemDetails.js';
 
 /**
  * Nielsen 26개 항목 점수 계산 (Puppeteer 통합)
@@ -138,8 +139,21 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
   
   console.log(`✅ Nielsen 점수: ${totalScore.toFixed(2)}/5.0 (${grade}) | 실측률: ${measuredRate}% (${measuredCount}/${scoreValues.length})`);
   
+  // 각 항목에 상세 정보 추가
+  const scoresWithDetails = {};
+  for (const [itemId, score] of Object.entries(scores)) {
+    const details = getItemDetails(itemId);
+    scoresWithDetails[itemId] = {
+      score,
+      name: details.name,
+      description: details.description,
+      why_important: details.why_important,
+      evaluation_criteria: details.evaluation_criteria
+    };
+  }
+  
   return {
-    scores,
+    scores: scoresWithDetails,
     summary: {
       totalScore,
       grade,

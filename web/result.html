@@ -607,14 +607,50 @@
         function displayItems(data) {
             // v3 JSON: scores 객체를 items 배열로 변환
             const items = [];
+            
+            // page_results에서 진단 결과 추출
+            const diagnosisMap = {};
+            if (data.details && data.details.page_results) {
+                for (const page of data.details.page_results) {
+                    for (const [itemId, result] of Object.entries(page.results || {})) {
+                        const details = result.details || {};
+                        // details 객체를 읽기 쉬운 문자열로 변환
+                        let diagnosisText = '';
+                        if (typeof details === 'string') {
+                            diagnosisText = details;
+                        } else if (details.error) {
+                            diagnosisText = `⚠️ ${details.error}`;
+                        } else {
+                            const parts = [];
+                            for (const [key, value] of Object.entries(details)) {
+                                if (typeof value === 'boolean') {
+                                    parts.push(`${key}: ${value ? '✅' : '❌'}`);
+                                } else if (typeof value === 'number' || typeof value === 'string') {
+                                    parts.push(`${key}: ${value}`);
+                                }
+                            }
+                            diagnosisText = parts.join(', ') || '측정 완료';
+                        }
+                        diagnosisMap[itemId] = diagnosisText;
+                    }
+                }
+            }
+            
+            // scores를 items 배열로 변환하고 진단 결과 추가
             if (data.scores) {
-                for (const [itemId, score] of Object.entries(data.scores)) {
+                for (const [itemId, scoreData] of Object.entries(data.scores)) {
+                    // scoreData는 { score, name, description, why_important, evaluation_criteria } 객체
+                    const score = typeof scoreData === 'object' ? scoreData.score : scoreData;
                     items.push({
                         itemId: itemId,
                         score: score,
-                        method: 'measured', // 임시
-                        accuracy: 95,
-                        result: '진단 결과 없음'
+                        name: scoreData.name || itemId,
+                        description: scoreData.description || '항목 설명 없음',
+                        why_important: scoreData.why_important || '중요도 설명 없음',
+                        evaluation_criteria: scoreData.evaluation_criteria || '평가 기준 없음',
+                        method: diagnosisMap[itemId] ? 'measured' : 'estimated',
+                        accuracy: diagnosisMap[itemId] ? 95 : 75,
+                        result: diagnosisMap[itemId] || '추정 점수 (HTML 분석 기반)'
                     });
                 }
             }
@@ -640,7 +676,7 @@
                     <div id="${itemId}" class="item-card" style="border-left-color: ${scoreColor};">
                         <div class="item-header">
                             <div style="flex: 1;">
-                                <div class="item-title">${getItemName(item.itemId)}</div>
+                                <div class="item-title">${item.name || getItemName(item.itemId)}</div>
                                 <div style="font-size: 13px; color: #0066FF; font-weight: 600; background: rgba(0, 102, 255, 0.1); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-top: 8px;">
                                     ${item.method === 'measured' ? '실측' : '추정'} (${item.accuracy}% 정확도)
                                 </div>
@@ -650,7 +686,7 @@
                                     <div id="${itemId}-score" class="item-score" style="color: ${scoreColor};">${item.score.toFixed(1)}</div>
                                     <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px; font-weight: 600;">${gradeName}</div>
                                 </div>
-                                <button class="btn-edit" onclick="openEditModal('${itemId}', '${item.itemId}', '${getItemName(item.itemId)}', ${item.score})">
+                                <button class="btn-edit" onclick="openEditModal('${itemId}', '${item.itemId}', '${item.name || getItemName(item.itemId)}', ${item.score})">
                                     ✏️ 수정
                                 </button>
                             </div>
@@ -658,19 +694,19 @@
                         
                         <div class="info-box description">
                             <div>
-                                📝 <strong style="color: #0066FF;">항목 설명:</strong> ${getItemDescription(item.itemId)}
+                                📝 <strong style="color: #0066FF;">항목 설명:</strong> ${item.description || '항목 설명 없음'}
                             </div>
                         </div>
                         
                         <div class="info-box reason">
                             <div>
-                                💡 <strong style="color: #f59e0b;">중요한 이유:</strong> ${getItemReason(item.itemId)}
+                                💡 <strong style="color: #f59e0b;">중요한 이유:</strong> ${item.why_important || '중요도 설명 없음'}
                             </div>
                         </div>
                         
                         <div class="info-box criteria">
                             <div>
-                                🔍 <strong style="color: var(--text-muted);">평가 기준:</strong> ${getItemCriteria(item.itemId)}
+                                🔍 <strong style="color: var(--text-muted);">평가 기준:</strong> ${item.evaluation_criteria || '평가 기준 없음'}
                             </div>
                         </div>
                         
