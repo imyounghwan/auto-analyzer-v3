@@ -115,7 +115,10 @@ async function generateRadarChart(result) {
   };
   
   const scores = Object.entries(categories).map(([label, items]) => {
-    const itemScores = items.map(key => result.scores[key] || 0);
+    const itemScores = items.map(key => {
+      const scoreData = result.scores[key] || 0;
+      return typeof scoreData === 'object' ? scoreData.score : scoreData;
+    });
     return itemScores.reduce((a, b) => a + b, 0) / itemScores.length;
   });
   
@@ -152,11 +155,17 @@ function generateHTMLReport(result, chartBase64) {
   const { url, summary } = result;
   const { totalScore, grade, overallAccuracy } = summary;
   
-  const sortedScores = Object.entries(result.scores).sort((a, b) => b[1] - a[1]);
+  // scores가 객체 형태이므로 .score 추출
+  const sortedScores = Object.entries(result.scores).sort((a, b) => {
+    const aScore = typeof a[1] === 'object' ? a[1].score : a[1];
+    const bScore = typeof b[1] === 'object' ? b[1].score : b[1];
+    return bScore - aScore;
+  });
   const top5 = sortedScores.slice(0, 5);
   const bottom5 = sortedScores.slice(-5).reverse();
   
-  const getScoreClass = (score) => {
+  const getScoreClass = (scoreData) => {
+    const score = typeof scoreData === 'object' ? scoreData.score : scoreData;
     if (score >= 4.5) return 'excellent';
     if (score >= 4.0) return 'good';
     if (score >= 3.0) return 'fair';
@@ -205,17 +214,19 @@ function generateHTMLReport(result, chartBase64) {
   <h2>🏆 상위 5개 항목</h2>
   <table>
     <tr><th>순위</th><th>항목</th><th>점수</th></tr>
-    ${top5.map(([key, score], i) => `
-      <tr><td>${i+1}</td><td>${key}</td><td><span class="badge ${getScoreClass(score)}">${score.toFixed(1)}/5.0</span></td></tr>
-    `).join('')}
+    ${top5.map(([key, scoreData], i) => {
+      const score = typeof scoreData === 'object' ? scoreData.score : scoreData;
+      return `<tr><td>${i+1}</td><td>${key}</td><td><span class="badge ${getScoreClass(scoreData)}">${score.toFixed(1)}/5.0</span></td></tr>`;
+    }).join('')}
   </table>
   
   <h2>⚠️ 개선 필요 항목</h2>
   <table>
     <tr><th>순위</th><th>항목</th><th>점수</th></tr>
-    ${bottom5.map(([key, score], i) => `
-      <tr><td>${i+1}</td><td>${key}</td><td><span class="badge ${getScoreClass(score)}">${score.toFixed(1)}/5.0</span></td></tr>
-    `).join('')}
+    ${bottom5.map(([key, scoreData], i) => {
+      const score = typeof scoreData === 'object' ? scoreData.score : scoreData;
+      return `<tr><td>${i+1}</td><td>${key}</td><td><span class="badge ${getScoreClass(scoreData)}">${score.toFixed(1)}/5.0</span></td></tr>`;
+    }).join('')}
   </table>
   
   <p style="text-align: center; margin-top: 50px; color: #7f8c8d; font-size: 12px;">
