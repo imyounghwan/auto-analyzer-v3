@@ -88,7 +88,7 @@ export async function runComprehensiveAnalysis(url, targetPages = null) {
       performanceResults = await Promise.race([
         analyzeWebVitals(url),
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Lighthouse timeout (30s)')), 30000)
+          setTimeout(() => reject(new Error('Lighthouse timeout (90s)')), 90000)
         )
       ]);
       console.log('\n✅ Lighthouse 분석 완료');
