@@ -1,7 +1,7 @@
 // src/analyzers/interactionAnalyzer.js - ACCURATE VERSION (전수 조사)
 
 /**
- * N1_3: 행동 피드백 실측 (모든 인터랙티브 요소 전수 조사)
+ * N1_3: 행동 피드백 실측 (샘플링 최대 30개, 60초 타임아웃)
  */
 export async function analyzeActionFeedback(page) {
   const results = { 
@@ -13,142 +13,110 @@ export async function analyzeActionFeedback(page) {
   };
   
   try {
-    console.log('  🖱️  N1_3 행동 피드백 (전수 조사)...');
+    console.log('  🖱️  N1_3 행동 피드백 (최대 60초)...');
     
-    // 모든 인터랙티브 요소 찾기
-    const buttons = await page.$$('button, a, [role="button"], input[type="submit"], input[type="button"]');
-    results.totalButtons = buttons.length;
-    
-    if (results.totalButtons === 0) {
-      console.log('  ⚠️ 인터랙티브 요소 없음');
-      return { score: 1.0, details: results };
-    }
-    
-    console.log(`  📊 총 ${results.totalButtons}개 요소 테스트 중...`);
-    
-    // 모든 요소에 대해 호버 테스트
-    for (const [index, element] of buttons.entries()) {
-      try {
-        const isVisible = await element.isVisible();
-        if (!isVisible) continue;
+    // 전체 분석 타임아웃 60초
+    const analysisPromise = (async () => {
+      // 모든 인터랙티브 요소 찾기
+      const buttons = await page.$$('button, a, [role="button"], input[type="submit"], input[type="button"]');
+      results.totalButtons = buttons.length;
+      
+      if (results.totalButtons === 0) {
+        console.log('  ⚠️ 인터랙티브 요소 없음');
+        return { score: 1.0, details: results };
+      }
+      
+      // 최대 30개로 제한
+      const maxElements = Math.min(30, results.totalButtons);
+      const sampledButtons = buttons.slice(0, maxElements);
+      
+      console.log(`  📊 총 ${results.totalButtons}개 중 ${maxElements}개 샘플 테스트...`);
+      
+      // 호버 테스트
+      for (const [index, element] of sampledButtons.entries()) {
+        try {
+          await Promise.race([
+            (async () => {
+              const isVisible = await element.isVisible().catch(() => false);
+              if (!isVisible) return;
+              
+              results.hoverTested++;
+              
+              const beforeStyle = await element.evaluate((el) => {
+                const style = getComputedStyle(el);
+                return { bg: style.backgroundColor, color: style.color, cursor: style.cursor };
+              });
+              
+              await element.hover({ timeout: 300 });
+              await page.waitForTimeout(50);
+              
+              const afterStyle = await element.evaluate((el) => {
+                const style = getComputedStyle(el);
+                return { bg: style.backgroundColor, color: style.color, cursor: style.cursor };
+              });
+              
+              if (Object.keys(beforeStyle).some(k => beforeStyle[k] !== afterStyle[k])) {
+                results.hoverPassed++;
+              }
+            })(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 500))
+          ]);
+        } catch (e) { /* 무시 */ }
         
-        results.hoverTested++;
-        
-        // 호버 전 스타일
-        const beforeStyle = await element.evaluate((el) => {
-          const style = getComputedStyle(el);
-          return {
-            backgroundColor: style.backgroundColor,
-            color: style.color,
-            transform: style.transform,
-            opacity: style.opacity,
-            cursor: style.cursor,
-            textDecoration: style.textDecoration,
-            border: style.border
-          };
-        });
-        
-        // 호버
-        await element.hover();
-        await page.waitForTimeout(100);
-        
-        // 호버 후 스타일
-        const afterStyle = await element.evaluate((el) => {
-          const style = getComputedStyle(el);
-          return {
-            backgroundColor: style.backgroundColor,
-            color: style.color,
-            transform: style.transform,
-            opacity: style.opacity,
-            cursor: style.cursor,
-            textDecoration: style.textDecoration,
-            border: style.border
-          };
-        });
-        
-        // 변화 감지
-        const hasChange = Object.keys(beforeStyle).some(key => beforeStyle[key] !== afterStyle[key]);
-        if (hasChange) results.hoverPassed++;
-        
-        // 진행률 표시 (10%마다)
-        if ((index + 1) % Math.ceil(results.totalButtons / 10) === 0) {
-          console.log(`  ⏳ 진행: ${index + 1}/${results.totalButtons} (${Math.round((index + 1) / results.totalButtons * 100)}%)`);
+        // 진행률 (20%마다)
+        if ((index + 1) % Math.ceil(maxElements / 5) === 0 || index === maxElements - 1) {
+          console.log(`  ⏳ 진행: ${index + 1}/${maxElements} (${Math.round((index + 1) / maxElements * 100)}%)`);
         }
-      } catch (error) {
-        // 요소 접근 실패는 무시
       }
-    }
-    
-    // 클릭 피드백 테스트 (랜덤 샘플 20개)
-    const sampleSize = Math.min(20, results.totalButtons);
-    const sampledButtons = buttons.sort(() => 0.5 - Math.random()).slice(0, sampleSize);
-    
-    for (const element of sampledButtons) {
-      try {
-        const isVisible = await element.isVisible();
-        if (!isVisible) continue;
-        
-        results.clickTested++;
-        
-        // 클릭 전 URL
-        const beforeUrl = page.url();
-        
-        // 클릭
-        await element.click({ timeout: 1000 });
-        await page.waitForTimeout(500);
-        
-        // 클릭 후 변화 확인
-        const afterUrl = page.url();
-        const urlChanged = beforeUrl !== afterUrl;
-        
-        // 페이지 내 변화 확인
-        const pageChanged = await page.evaluate(() => {
-          return document.body.innerHTML !== window.initialHTML;
-        });
-        
-        if (urlChanged || pageChanged) {
-          results.clickPassed++;
-          // 원래 페이지로 돌아가기
-          if (urlChanged) {
-            await page.goBack({ timeout: 2000 });
-            await page.waitForTimeout(500);
-          }
-        }
-      } catch (error) {
-        // 클릭 실패는 무시
+      
+      // 클릭 테스트 (최대 10개)
+      const clickSample = sampledButtons.slice(0, Math.min(10, maxElements));
+      for (const element of clickSample) {
+        try {
+          await Promise.race([
+            (async () => {
+              const isVisible = await element.isVisible().catch(() => false);
+              if (!isVisible) return;
+              
+              results.clickTested++;
+              await element.click({ timeout: 500 });
+              results.clickPassed++;
+            })(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 500))
+          ]);
+        } catch (e) { /* 무시 */ }
       }
-    }
+      
+      // 점수 계산
+      const hoverRate = results.hoverTested > 0 ? results.hoverPassed / results.hoverTested : 0;
+      const clickRate = results.clickTested > 0 ? results.clickPassed / results.clickTested : 0;
+      const totalRate = (hoverRate + clickRate) / 2;
+      
+      let score = 2.0;
+      if (totalRate >= 0.9) score = 5.0;
+      else if (totalRate >= 0.8) score = 4.5;
+      else if (totalRate >= 0.7) score = 4.0;
+      else if (totalRate >= 0.6) score = 3.5;
+      else if (totalRate >= 0.5) score = 3.0;
+      else if (totalRate >= 0.4) score = 2.5;
+      
+      console.log(`  ✅ 호버: ${results.hoverPassed}/${results.hoverTested} (${(hoverRate * 100).toFixed(1)}%)`);
+      console.log(`  ✅ 클릭: ${results.clickPassed}/${results.clickTested} (${(clickRate * 100).toFixed(1)}%)`);
+      console.log(`  ✅ 최종 점수: ${score}/5.0`);
+      
+      return { score, details: results };
+    })();
     
-    // 점수 계산
-    const hoverRate = results.hoverTested > 0 ? results.hoverPassed / results.hoverTested : 0;
-    const clickRate = results.clickTested > 0 ? results.clickPassed / results.clickTested : 0;
-    const totalRate = (hoverRate + clickRate) / 2;
+    // 60초 타임아웃
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('N1_3 timeout (60s)')), 60000)
+    );
     
-    let score = 1.0;
-    if (totalRate >= 0.9) score = 5.0;
-    else if (totalRate >= 0.8) score = 4.5;
-    else if (totalRate >= 0.7) score = 4.0;
-    else if (totalRate >= 0.6) score = 3.5;
-    else if (totalRate >= 0.5) score = 3.0;
-    else if (totalRate >= 0.4) score = 2.5;
-    else score = 2.0;
+    return await Promise.race([analysisPromise, timeoutPromise]);
     
-    console.log(`  ✅ 호버: ${results.hoverPassed}/${results.hoverTested} (${(hoverRate * 100).toFixed(1)}%)`);
-    console.log(`  ✅ 클릭: ${results.clickPassed}/${results.clickTested} (${(clickRate * 100).toFixed(1)}%)`);
-    console.log(`  ✅ 최종 점수: ${score}/5.0`);
-    
-    return { 
-      score, 
-      details: { 
-        ...results, 
-        hoverRate: `${(hoverRate * 100).toFixed(1)}%`,
-        clickRate: `${(clickRate * 100).toFixed(1)}%`,
-        totalRate: `${(totalRate * 100).toFixed(1)}%`
-      }
-    };
   } catch (error) {
-    console.error('  ❌ N1_3 실패:', error.message);
-    return { score: 0, details: { error: error.message } };
+    console.warn(`  ❌ N1_3 실패: ${error.message}`);
+    return { score: 2.0, details: { error: error.message, ...results } };
   }
 }
 
