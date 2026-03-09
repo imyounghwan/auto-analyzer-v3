@@ -14,7 +14,7 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
     // N1: 시스템 상태 가시성
     N1_1_status_visibility: calculateBasicScore(structure.navigation.hasNav, 3.5),
     N1_2_feedback_timing: 3.5,
-    N1_3_action_feedback: interaction.actionFeedback?.score || 3.0,
+    N1_3_action_feedback: interaction.N1_3_action_feedback?.score || 3.0,
     
     // N2: 현실 세계 일치
     N2_1_familiar_terms: 3.5,
@@ -22,8 +22,8 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
     
     // N3: 사용자 제어와 자유
     N3_1_undo_redo: calculateBasicScore(structure.forms.count > 0, 3.0),
-    N3_2_emergency_exit: interaction.emergencyExit?.score || 3.5,
-    N3_3_flexible_navigation: interaction.navigationFreedom?.score || calculateNavigationScore(structure.links),
+    N3_2_emergency_exit: interaction.N3_2_emergency_exit?.score || 3.5,
+    N3_3_flexible_navigation: interaction.N3_3_flexible_navigation?.score || calculateNavigationScore(structure.links),
     
     // N4: 일관성과 표준
     N4_1_visual_consistency: 3.5,
@@ -31,7 +31,7 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
     N4_3_standard_compliance: 4.0,
     
     // N5: 오류 방지
-    N5_1_input_validation: calculateBasicScore(structure.forms.inputs > 0, 3.5),
+    N5_1_input_validation: interaction.N5_1_input_validation?.score || calculateBasicScore(structure.forms.inputs > 0, 3.5),
     N5_2_confirmation_dialog: 3.5,
     N5_3_constraints: 3.5,
     
@@ -41,9 +41,9 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
     N6_3_memory_load: calculateBasicScore(structure.navigation.hasBreadcrumb, 3.5),
     
     // N7: 유연성과 효율성
-    N7_1_accelerators: interaction.accelerators?.score || 3.0,
-    N7_2_personalization: interaction.personalization?.score || 3.0,
-    N7_3_batch_operations: interaction.batchOperations?.score || 3.0,
+    N7_1_accelerators: interaction.N7_1_accelerators?.score || 3.0,
+    N7_2_personalization: interaction.N7_2_personalization?.score || 3.0,
+    N7_3_batch_operations: interaction.N7_3_batch_operations?.score || 3.0,
     
     // N8: 미니멀 디자인
     N8_1_essential_info: 3.5,
@@ -51,16 +51,16 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
     N8_3_visual_hierarchy: calculateBasicScore(structure.headings.total > 5, 3.5),
     
     // N9: 오류 인식 및 복구
-    N9_1_error_messages: 3.5,
-    N9_2_recovery_support: interaction.recoverySupport?.score || 3.0,
+    N9_1_error_messages: interaction.N9_1_error_messages?.score || 3.5,
+    N9_2_recovery_support: interaction.N9_2_recovery_support?.score || 3.0,
     
     // N10: 도움말과 문서
     N10_1_help_visibility: 3.5,
     N10_2_documentation: 3.5,
     
     // N11: 검색 기능
-    N11_1_search_autocomplete: interaction.searchAutocomplete?.score || 2.0,
-    N11_2_search_quality: interaction.searchQuality?.score || (interaction.searchAutocomplete?.hasSearch ? 3.5 : 2.0),
+    N11_1_search_autocomplete: interaction.N11_1_search_autocomplete?.score || 2.0,
+    N11_2_search_quality: interaction.N11_2_search_quality?.score || (interaction.N11_1_search_autocomplete?.hasSearch ? 3.5 : 2.0),
     
     // N12: 반응형 디자인
     N12_1_responsive_layout: 4.0,
@@ -102,23 +102,25 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
     low_accuracy: []  // 70-80% (HTML만)
   };
   
-  // Puppeteer 실측 항목 (95%+)
-  if (interaction.actionFeedback) accuracyMap.high_accuracy.push('N1_3');
-  if (interaction.emergencyExit) accuracyMap.high_accuracy.push('N3_2');
-  if (interaction.navigationFreedom) accuracyMap.high_accuracy.push('N3_3');
-  if (interaction.searchAutocomplete) accuracyMap.high_accuracy.push('N11_1');
-  if (interaction.searchQuality) accuracyMap.high_accuracy.push('N11_2');
+  // Puppeteer 실측 항목 (95%+) - 정확한 키 이름 사용
+  if (interaction.N1_3_action_feedback) accuracyMap.high_accuracy.push('N1_3');
+  if (interaction.N3_2_emergency_exit) accuracyMap.high_accuracy.push('N3_2');
+  if (interaction.N3_3_flexible_navigation) accuracyMap.high_accuracy.push('N3_3');
+  if (interaction.N11_1_search_autocomplete) accuracyMap.high_accuracy.push('N11_1');
+  if (interaction.N11_2_search_quality) accuracyMap.high_accuracy.push('N11_2');
+  if (interaction.N5_1_input_validation) accuracyMap.high_accuracy.push('N5_1');
+  if (interaction.N9_1_error_messages) accuracyMap.high_accuracy.push('N9_1');
   
   // Lighthouse 실측 항목 (98%+)
-  if (performance.lcp?.value > 0) {
+  if (performance.lcp?.value > 0 || performance.lcp?.score > 0) {
     accuracyMap.high_accuracy.push('N17_1', 'N17_2', 'N17_3', 'N17_4');
   }
   
-  // 중간 정확도 (85-90%)
-  if (interaction.accelerators) accuracyMap.medium_accuracy.push('N7_1');
-  if (interaction.personalization) accuracyMap.medium_accuracy.push('N7_2');
-  if (interaction.batchOperations) accuracyMap.medium_accuracy.push('N7_3');
-  if (interaction.recoverySupport) accuracyMap.medium_accuracy.push('N9_2');
+  // 중간 정확도 (85-90%) - 정확한 키 이름 사용
+  if (interaction.N7_1_accelerators) accuracyMap.medium_accuracy.push('N7_1');
+  if (interaction.N7_2_personalization) accuracyMap.medium_accuracy.push('N7_2');
+  if (interaction.N7_3_batch_operations) accuracyMap.medium_accuracy.push('N7_3');
+  if (interaction.N9_2_recovery_support) accuracyMap.medium_accuracy.push('N9_2');
   
   // 통계 계산
   const scoreValues = Object.values(scores);
