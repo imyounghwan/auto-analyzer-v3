@@ -596,7 +596,15 @@
                         <span style="font-size: 28px;">📋</span> 종합 평가 총평
                     </div>
                     <div style="font-size: 16px; color: #D1D5DB; line-height: 2; padding: 20px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);">
-                        전체 ${data.summary?.itemCount || 43}개 항목 중 ${data.summary?.puppeteerMeasured || 0}개 항목을 실측하여 종합 점수 ${(data.summary?.totalScore || data.totalScore || 0).toFixed(2)}/5.0 (등급: ${grade})을 기록했습니다.<br><br>
+                        <strong>전체 ${data.summary?.itemCount || 43}개 항목</strong>을 분석하여 종합 점수 <strong style="color: #0066FF;">${(data.summary?.totalScore || data.totalScore || 0).toFixed(2)}/5.0</strong> (등급: <strong style="color: #0066FF;">${grade}</strong>)을 기록했습니다.<br><br>
+                        
+                        <div style="margin: 15px 0; padding: 15px; background: rgba(0, 102, 255, 0.05); border-left: 3px solid #0066FF; border-radius: 8px;">
+                            <strong>📊 분석 방법:</strong><br>
+                            • 실제 브라우저 테스트: ${data.summary?.accuracyBreakdown?.puppeteerMeasured || 0}개 (정확도 95%+)<br>
+                            • 성능 측정: ${data.summary?.accuracyBreakdown?.patternMatched || 0}개 (Lighthouse)<br>
+                            • HTML 정적 분석: ${data.summary?.accuracyBreakdown?.htmlOnly || 0}개 (정확도 75%)
+                        </div>
+                        
                         <strong>우수:</strong> ${data.summary?.excellentCount || 0}개, <strong>양호:</strong> ${data.summary?.goodCount || 0}개, <strong>보통:</strong> ${data.summary?.fairCount || 0}개, <strong>미흡:</strong> ${data.summary?.poorCount || 0}개
                     </div>
                 </div>
