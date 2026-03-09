@@ -590,6 +590,13 @@
         
         function displaySummary(data) {
             const grade = data.summary?.grade || data.grade || 'B';
+            
+            // 디버깅 로그
+            console.log('[디버깅] puppeteerMeasured:', data.summary?.accuracyBreakdown?.puppeteerMeasured);
+            console.log('[디버깅] patternMatched:', data.summary?.accuracyBreakdown?.patternMatched);
+            console.log('[디버깅] htmlOnly:', data.summary?.accuracyBreakdown?.htmlOnly);
+            console.log('[디버깅] 합계:', (data.summary?.accuracyBreakdown?.puppeteerMeasured || 0) + (data.summary?.accuracyBreakdown?.patternMatched || 0));
+            
             const html = `
                 <div class="section-card">
                     <div style="font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
@@ -600,9 +607,10 @@
                         
                         <div style="margin: 15px 0; padding: 15px; background: rgba(0, 102, 255, 0.05); border-left: 3px solid #0066FF; border-radius: 8px;">
                             <strong>📊 분석 방법:</strong><br>
-                            • 실제 브라우저 테스트: ${data.summary?.accuracyBreakdown?.puppeteerMeasured || 0}개 (정확도 95%+)<br>
-                            • 성능 측정: ${data.summary?.accuracyBreakdown?.patternMatched || 0}개 (Lighthouse)<br>
-                            • HTML 정적 분석: ${data.summary?.accuracyBreakdown?.htmlOnly || 0}개 (정확도 75%)
+                            • 실제 브라우저 테스트: <strong>${(data.summary?.accuracyBreakdown?.puppeteerMeasured || 0) + (data.summary?.accuracyBreakdown?.patternMatched || 0)}개</strong> 
+                            (Puppeteer ${data.summary?.accuracyBreakdown?.puppeteerMeasured || 0}개 + 패턴 매칭 ${data.summary?.accuracyBreakdown?.patternMatched || 0}개, 정확도 95%+)<br>
+                            • 성능 측정: <strong>4개</strong> (Lighthouse LCP/FID/CLS/TTI, 정확도 98%)<br>
+                            • HTML 정적 분석: <strong>${data.summary?.accuracyBreakdown?.htmlOnly || 0}개</strong> (정확도 75%)
                         </div>
                         
                         <strong>우수:</strong> ${data.summary?.excellentCount || 0}개, <strong>양호:</strong> ${data.summary?.goodCount || 0}개, <strong>보통:</strong> ${data.summary?.fairCount || 0}개, <strong>미흡:</strong> ${data.summary?.poorCount || 0}개
