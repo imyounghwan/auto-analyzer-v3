@@ -110,7 +110,8 @@ program
       console.log('📊 분석 방법:');
       console.log(`  전체 항목: 43개 (100% 측정 완료)`);
       console.log(`  ├─ 실제 브라우저 테스트: ${result.summary.accuracyBreakdown.puppeteerMeasured}개 (Puppeteer, 정확도 95%+)`);
-      console.log(`  ├─ 성능 측정: ${result.summary.accuracyBreakdown.patternMatched > 0 ? '4개 (Lighthouse, 정확도 98%)' : '0개 (Lighthouse 스킵)'}`);
+      console.log(`  ├─ 패턴 매칭 분석: ${result.summary.accuracyBreakdown.patternMatched}개 (정확도 90%)`);
+      console.log(`  ├─ 성능 측정: ${result.summary.accuracyBreakdown.lighthouseMeasured || 0}개 (Lighthouse${result.summary.accuracyBreakdown.lighthouseMeasured > 0 ? ', 정확도 98%' : ' 실패'})`);
       console.log(`  └─ HTML 정적 분석: ${result.summary.accuracyBreakdown.htmlOnly}개 (정확도 75%)`);
       console.log('');
       console.log(`📁 결과 저장: ${jsonPath}`);

@@ -112,8 +112,10 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
   if (interaction.N9_1_error_messages) accuracyMap.high_accuracy.push('N9_1');
   
   // Lighthouse 실측 항목 (98%+)
+  let lighthouseMeasured = 0;
   if (performance.lcp?.value > 0 || performance.lcp?.score > 0) {
     accuracyMap.high_accuracy.push('N17_1', 'N17_2', 'N17_3', 'N17_4');
+    lighthouseMeasured = 4;  // Lighthouse 성공 시에만 4개로 설정
   }
   
   // 중간 정확도 (85-90%) - 정확한 키 이름 사용
@@ -166,8 +168,9 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
       poorCount: scoreValues.filter(s => s < 3.0).length,
       overallMeasuredRate: `${measuredRate}%`,
       accuracyBreakdown: {
-        puppeteerMeasured: highCount,
+        puppeteerMeasured: highCount - lighthouseMeasured,  // Puppeteer만
         patternMatched: mediumCount,
+        lighthouseMeasured,  // Lighthouse 성공 여부
         htmlOnly: lowCount
       }
     }
