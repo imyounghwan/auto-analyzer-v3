@@ -79,11 +79,13 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
     // N16: 폼 복잡도
     N16_form_complexity: calculateFormComplexity(structure.forms),
     
-    // N17: 성능 (Lighthouse 실측)
-    N17_1_lcp_performance: performance.lcp?.score || 4.0,
-    N17_2_fid_responsiveness: performance.fid?.score || 4.0,
-    N17_3_cls_stability: performance.cls?.score || 4.0,
-    N17_4_tti_interactive: performance.tti?.score || 4.0,
+    // N17: 성능 (Lighthouse 실측) - 실패 시 항목 제외
+    ...(performance.error ? {} : {
+      N17_1_lcp_performance: performance.lcp?.score || 3.0,
+      N17_2_fid_responsiveness: performance.fid?.score || 3.0,
+      N17_3_cls_stability: performance.cls?.score || 3.0,
+      N17_4_tti_interactive: performance.tti?.score || 3.0
+    }),
     
     // N18: 다국어 지원
     N18_multilingual: calculateBasicScore(accessibility.langAttribute, 2.5),
@@ -113,7 +115,8 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
   
   // Lighthouse 실측 항목 (98%+)
   let lighthouseMeasured = 0;
-  if (performance.lcp?.value > 0 || performance.lcp?.score > 0) {
+  // performance.error가 없고, 실제 측정값이 있을 때만 성공으로 판단
+  if (!performance.error && (performance.lcp?.value > 0 || performance.lcp?.score > 0)) {
     accuracyMap.high_accuracy.push('N17_1', 'N17_2', 'N17_3', 'N17_4');
     lighthouseMeasured = 4;  // Lighthouse 성공 시에만 4개로 설정
   }

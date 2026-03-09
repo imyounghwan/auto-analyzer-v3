@@ -93,7 +93,12 @@ export async function runComprehensiveAnalysis(url, targetPages = null) {
       ]);
       console.log('\n✅ Lighthouse 분석 완료');
     } catch (perfError) {
-      console.warn(`\n⚠️  Lighthouse 스킵: ${perfError.message}`);
+      console.warn(`\n❌ Lighthouse 실패: ${perfError.message}`);
+      // Windows EPERM 오류 추가 안내
+      if (perfError.message.includes('EPERM') || perfError.message.includes('Permission denied')) {
+        console.warn('💡 해결 방법: 관리자 권한으로 실행하거나 바이러스 백신을 일시 중지하세요.');
+      }
+      performanceResults = { error: perfError.message }; // 명시적으로 오류 표시
     }
     
     await browser.close();
