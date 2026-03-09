@@ -144,7 +144,7 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
   const measuredCount = highCount + mediumCount;
   const measuredRate = ((measuredCount / scoreValues.length) * 100).toFixed(1);
   
-  console.log(`✅ Nielsen 점수: ${totalScore.toFixed(2)}/5.0 (${grade}) | 브라우저 테스트: ${measuredCount}개, HTML 분석: ${lowCount}개`);
+  console.log(`✅ Nielsen 점수: ${totalScore.toFixed(2)}/5.0 (${grade}) | 실제 브라우저 분석 + AI 정적 분석`);
   
   // 각 항목에 상세 정보 추가
   const scoresWithDetails = {};

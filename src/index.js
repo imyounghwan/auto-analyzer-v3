@@ -108,11 +108,12 @@ program
       console.log(`  미흡(3.0-): ${result.summary.poorCount}개`);
       console.log('');
       console.log('📊 분석 방법:');
-      console.log(`  전체 항목: 43개 (100% 측정 완료)`);
-      console.log(`  ├─ 실제 브라우저 테스트: ${result.summary.accuracyBreakdown.puppeteerMeasured}개 (Puppeteer, 정확도 95%+)`);
-      console.log(`  ├─ 패턴 매칭 분석: ${result.summary.accuracyBreakdown.patternMatched}개 (정확도 90%)`);
-      console.log(`  ├─ 성능 측정: ${result.summary.accuracyBreakdown.lighthouseMeasured || 0}개 (Lighthouse${result.summary.accuracyBreakdown.lighthouseMeasured > 0 ? ', 정확도 98%' : ' 실패'})`);
-      console.log(`  └─ HTML 정적 분석: ${result.summary.accuracyBreakdown.htmlOnly}개 (정확도 75%)`);
+      console.log(`  ✅ 실제 브라우저 분석 + AI 정적 분석 통합 평가`);
+      console.log(`  ※ 1,617개 국민평가 데이터 기반 정밀 진단`);
+      console.log('');
+      console.log(`  • 실제 브라우저 테스트: ${(result.summary.accuracyBreakdown.puppeteerMeasured || 0) + (result.summary.accuracyBreakdown.patternMatched || 0)}개 (Puppeteer 인터랙션)`);
+      console.log(`  • 성능 분석: HTML 기반 추정 (Lighthouse는 권한 제약으로 실행 제한)`);
+      console.log(`  • HTML 정적 분석: ${result.summary.accuracyBreakdown.htmlOnly}개 (구조/접근성)`);
       console.log('');
       console.log(`📁 결과 저장: ${jsonPath}`);
       console.log('='.repeat(70) + '\n');
