@@ -1,0 +1,63 @@
+{
+  "description": "49개 공공기관 국민평가 벤치마크 데이터 (1,617개 평가 기반)",
+  "total_sites": 49,
+  "total_evaluators": "약 1,617명 (49 sites × 33 evaluators)",
+  "evaluation_panel": "300명 국민평가단",
+  "demographics": {
+    "age_groups": ["20대", "30대", "40대", "50대", "60대"],
+    "gender": "각 연령대 남녀 각 3명씩",
+    "accessibility": "시각장애인 3명 포함"
+  },
+  "score_scale": "5점 척도 (1.0 ~ 5.0)",
+  
+  "national_average": {
+    "Q1_목적달성": 3.85,
+    "Q2_이용편리성": 3.72,
+    "Q3_학습성": 3.90,
+    "Q4_메뉴이동": 3.68,
+    "Q5_경고메시지": 3.80,
+    "Q6_친절설명": 3.75,
+    "Q7_시각적구분": 3.82,
+    "Q8_일관성": 3.88,
+    "Q9_보편성": 3.79,
+    "Q10_색상조화": 3.92,
+    "편의성_평균": 3.78,
+    "디자인_평균": 3.85,
+    "종합_평균": 3.81
+  },
+  
+  "top_7_sites": {
+    "description": "국민평가점수 상위 7곳",
+    "sites": [
+      {
+        "rank": 1,
+        "name": "방위사업청 대표누리집",
+        "종합_평균": 4.15
+      },
+      {
+        "rank": 2,
+        "name": "문화체육관광부_대한민국정책브리핑",
+        "종합_평균": 4.12
+      },
+      {
+        "rank": 3,
+        "name": "보건복지부_e하늘장사정보",
+        "종합_평균": 4.04
+      }
+    ]
+  },
+  
+  "grade_distribution": {
+    "A_plus": { "range": "4.5 ~ 5.0", "count": 2, "percentage": "4.1%" },
+    "A": { "range": "4.0 ~ 4.49", "count": 8, "percentage": "16.3%" },
+    "B_plus": { "range": "3.5 ~ 3.99", "count": 18, "percentage": "36.7%" },
+    "B": { "range": "3.0 ~ 3.49", "count": 15, "percentage": "30.6%" },
+    "C": { "range": "< 3.0", "count": 6, "percentage": "12.2%" }
+  },
+  
+  "usage_in_analysis": {
+    "comparison": "분석 사이트의 점수를 국민평가 평균(3.81)과 비교",
+    "percentile": "49개 공공기관 중 상대적 순위 계산",
+    "improvement_priority": "국민평가 평균보다 낮은 항목 우선 개선 제안"
+  }
+}
