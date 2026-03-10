@@ -16,12 +16,21 @@ export async function predictNielsenScore(qScores) {
     // Q1~Q10 점수 배열로 변환
     const scores = [];
     for (let q = 1; q <= 10; q++) {
+      // Q1, Q1_목적달성 두 형식 모두 지원
       const qKey = `Q${q}`;
-      if (qScores[qKey] === undefined) {
-        reject(new Error(`Q${q} 점수가 누락되었습니다`));
+      let score = qScores[qKey];
+      
+      // Q1_목적달성 형식도 확인
+      if (score === undefined) {
+        const alternativeKey = Object.keys(qScores).find(k => k.startsWith(qKey + '_'));
+        score = alternativeKey ? qScores[alternativeKey] : undefined;
+      }
+      
+      if (score === undefined) {
+        reject(new Error(`Q${q} 점수가 누락되었습니다. 입력: ${JSON.stringify(Object.keys(qScores))}`));
         return;
       }
-      scores.push(qScores[qKey].toString());
+      scores.push(score.toString());
     }
 
     // Python 스크립트 실행
