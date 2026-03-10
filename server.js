@@ -20,6 +20,9 @@ app.use(express.static(path.join(__dirname, 'web')));
 // Serve output files
 app.use('/output', express.static(path.join(__dirname, 'output')));
 
+// Serve downloads directory
+app.use('/downloads', express.static(path.join(__dirname, 'web/downloads')));
+
 // Main route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'web', 'index.html'));
