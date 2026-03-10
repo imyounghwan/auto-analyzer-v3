@@ -9,10 +9,13 @@ const __dirname = dirname(__filename);
 
 // 1,617개 국민평가 데이터 로드
 let nationalBenchmark = null;
+let nationalMapping = null;
 try {
   const benchmarkPath = join(__dirname, '../../data/national_evaluation_benchmark.json');
+  const mappingPath = join(__dirname, '../../data/national_evaluation_mapping.json');
   nationalBenchmark = JSON.parse(readFileSync(benchmarkPath, 'utf-8'));
-  console.log('✅ 1,617개 국민평가 데이터 로드 완료');
+  nationalMapping = JSON.parse(readFileSync(mappingPath, 'utf-8'));
+  console.log('✅ 1,617개 국민평가 데이터 + 매핑 로드 완료');
 } catch (error) {
   console.warn('⚠️ 국민평가 데이터 로드 실패, 기본값 사용');
 }
@@ -162,16 +165,19 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
   
   console.log(`✅ Nielsen 점수: ${totalScore.toFixed(2)}/5.0 (${grade}) | 실제 브라우저 분석 + AI 정적 분석`);
   
-  // 각 항목에 상세 정보 추가
+  // 각 항목에 상세 정보 + 국민평가 비교 추가
   const scoresWithDetails = {};
   for (const [itemId, score] of Object.entries(scores)) {
     const details = getItemDetails(itemId);
+    const nationalItemComparison = getNationalItemComparison(itemId, score);
+    
     scoresWithDetails[itemId] = {
       score,
       name: details.name,
       description: details.description,
       why_important: details.why_important,
-      evaluation_criteria: details.evaluation_criteria
+      evaluation_criteria: details.evaluation_criteria,
+      nationalComparison: nationalItemComparison  // 항목별 국민평가 비교
     };
   }
   
@@ -251,4 +257,50 @@ function calculateBrandingScore(structure) {
   if (structure.images.count > 0) score += 0.5;
   if (structure.headings.h1 > 0) score += 0.5;
   return Math.min(5.0, score);
+}
+
+/**
+ * Nielsen 항목별 국민평가 데이터 비교
+ * @param {string} itemId - Nielsen 항목 ID (예: N1_1_status_visibility)
+ * @param {number} score - 현재 사이트의 점수
+ * @returns {object|null} - 국민평가 비교 결과
+ */
+function getNationalItemComparison(itemId, score) {
+  if (!nationalBenchmark || !nationalMapping) return null;
+  
+  // Nielsen 항목 → 국민평가 Q1~Q10 역매핑
+  const mapping = nationalMapping.mapping;
+  let relatedQuestions = [];
+  
+  for (const [qKey, qData] of Object.entries(mapping)) {
+    if (qData.nielsen_items && qData.nielsen_items.includes(itemId)) {
+      relatedQuestions.push({
+        question: qKey,
+        questionText: qData.question,
+        category: qData.category,
+        nationalAverage: nationalBenchmark.national_average[qKey]
+      });
+    }
+  }
+  
+  if (relatedQuestions.length === 0) return null;
+  
+  // 해당 Nielsen 항목과 관련된 국민평가 질문들의 평균
+  const avgNationalScore = relatedQuestions.reduce((sum, q) => sum + q.nationalAverage, 0) / relatedQuestions.length;
+  const difference = (score - avgNationalScore).toFixed(2);
+  
+  return {
+    relatedQuestions: relatedQuestions.map(q => ({
+      question: q.question,
+      text: q.questionText,
+      category: q.category,
+      nationalAverage: q.nationalAverage
+    })),
+    avgNationalScore: avgNationalScore.toFixed(2),
+    difference,
+    status: score >= avgNationalScore ? '우수' : '개선필요',
+    message: score >= avgNationalScore
+      ? `국민평가 평균(${avgNationalScore.toFixed(2)})보다 ${Math.abs(difference)}점 높습니다`
+      : `국민평가 평균(${avgNationalScore.toFixed(2)})보다 ${Math.abs(difference)}점 낮습니다 (개선 필요)`
+  };
 }

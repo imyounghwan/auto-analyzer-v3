@@ -663,7 +663,7 @@
             // scores를 items 배열로 변환하고 진단 결과 추가
             if (data.scores) {
                 for (const [itemId, scoreData] of Object.entries(data.scores)) {
-                    // scoreData는 { score, name, description, why_important, evaluation_criteria } 객체
+                    // scoreData는 { score, name, description, why_important, evaluation_criteria, nationalComparison } 객체
                     const score = typeof scoreData === 'object' ? scoreData.score : scoreData;
                     items.push({
                         itemId: itemId,
@@ -672,6 +672,7 @@
                         description: scoreData.description || '항목 설명 없음',
                         why_important: scoreData.why_important || '중요도 설명 없음',
                         evaluation_criteria: scoreData.evaluation_criteria || '평가 기준 없음',
+                        nationalComparison: scoreData.nationalComparison || null,  // 국민평가 비교 추가
                         method: diagnosisMap[itemId] ? 'measured' : 'estimated',
                         accuracy: diagnosisMap[itemId] ? 95 : 75,
                         result: diagnosisMap[itemId] || '추정 점수 (HTML 분석 기반)'
@@ -739,6 +740,23 @@
                                 📊 <strong style="color: ${scoreColor};">진단 결과:</strong> ${item.result || '진단 정보 없음'}
                             </div>
                         </div>
+                        
+                        ${item.nationalComparison ? `
+                        <div class="info-box" style="border-color: #8b5cf6; background: rgba(139, 92, 246, 0.05);">
+                            <div style="color: #8b5cf6; font-weight: 700; margin-bottom: 8px;">
+                                🏆 국민평가 데이터 비교 (1,617개 평가 기반)
+                            </div>
+                            <div style="margin-left: 24px; color: #333;">
+                                • 내 점수: <strong style="color: ${scoreColor};">${item.score.toFixed(2)}</strong><br>
+                                • 국민평가 평균: <strong style="color: #8b5cf6;">${item.nationalComparison.avgNationalScore}</strong><br>
+                                • 차이: <strong style="color: ${item.nationalComparison.status === '우수' ? '#00C9A7' : '#ef4444'};">${item.nationalComparison.difference}점 (${item.nationalComparison.status})</strong><br>
+                                • 관련 항목: ${item.nationalComparison.relatedQuestions.map(q => `<span style="background: rgba(139, 92, 246, 0.1); padding: 2px 8px; border-radius: 4px; font-size: 12px;">${q.question}: ${q.text}</span>`).join(' ')}<br>
+                                <div style="margin-top: 8px; padding: 8px; background: ${item.nationalComparison.status === '우수' ? 'rgba(0, 201, 167, 0.1)' : 'rgba(239, 68, 68, 0.1)'}; border-radius: 6px;">
+                                    💬 ${item.nationalComparison.message}
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
                         
                         <div class="progress-bar">
                             <div class="progress-fill" style="background: ${scoreColor}; width: ${(item.score/5)*100}%;"></div>
