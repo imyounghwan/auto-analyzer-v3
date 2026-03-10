@@ -1,9 +1,13 @@
 // src/analyzers/performanceAnalyzer.js
 import lighthouse from 'lighthouse';
 import * as chromeLauncher from 'chrome-launcher';
+import os from 'os';
+import path from 'path';
+import fs from 'fs';
 
 /**
  * Lighthouse Web Vitals 측정 (N17_1-4)
+ * Windows EPERM 오류 해결: 커스텀 Temp 디렉토리 사용
  */
 export async function analyzeWebVitals(url) {
   let chrome;
@@ -11,9 +15,23 @@ export async function analyzeWebVitals(url) {
   try {
     console.log('  ⚡ 성능 측정 중 (Lighthouse)...');
     
-    // Chrome 실행
+    // Windows EPERM 해결: 프로젝트 폴더 내 .tmp 디렉토리 생성
+    const customTmpDir = path.join(process.cwd(), '.tmp', 'lighthouse');
+    if (!fs.existsSync(customTmpDir)) {
+      fs.mkdirSync(customTmpDir, { recursive: true });
+    }
+    
+    // Chrome 실행 (커스텀 user-data-dir 사용)
     chrome = await chromeLauncher.launch({
-      chromeFlags: ['--headless', '--no-sandbox', '--disable-gpu']
+      chromeFlags: [
+        '--headless',
+        '--no-sandbox',
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--disable-software-rasterizer',
+        `--user-data-dir=${customTmpDir}`,
+        '--disable-extensions'
+      ]
     });
     
     const options = {
