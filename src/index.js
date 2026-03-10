@@ -112,7 +112,7 @@ program
       console.log(`  ※ 1,617개 국민평가 데이터 기반 정밀 진단`);
       console.log('');
       console.log(`  • 실제 브라우저 테스트: ${(result.summary.accuracyBreakdown.puppeteerMeasured || 0) + (result.summary.accuracyBreakdown.patternMatched || 0)}개 (Puppeteer 인터랙션)`);
-      console.log(`  • 성능 분석: HTML 기반 추정 (Lighthouse는 권한 제약으로 실행 제한)`);
+      console.log(`  • 성능 측정: ${result.summary.accuracyBreakdown.lighthouseMeasured || 0}개 (Puppeteer Performance API)`);
       console.log(`  • HTML 정적 분석: ${result.summary.accuracyBreakdown.htmlOnly}개 (구조/접근성)`);
       console.log('');
       console.log(`📁 결과 저장: ${jsonPath}`);

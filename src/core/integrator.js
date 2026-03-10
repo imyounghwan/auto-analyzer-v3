@@ -84,20 +84,16 @@ export async function runComprehensiveAnalysis(url, targetPages = null) {
     // 4. Lighthouse 성능 측정 (메인 페이지만)
     let performanceResults = {};
     try {
-      progressBar.update(75, { task: '⚡ 성능 측정 중 (Lighthouse)...' });
+      progressBar.update(75, { task: '⚡ 성능 측정 중 (Puppeteer)...' });
       performanceResults = await Promise.race([
         analyzeWebVitals(url),
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Lighthouse timeout (90s)')), 90000)
+          setTimeout(() => reject(new Error('성능 측정 timeout (90s)')), 90000)
         )
       ]);
-      console.log('\n✅ Lighthouse 분석 완료');
+      console.log('\n✅ 성능 측정 완료');
     } catch (perfError) {
-      console.warn(`\n❌ Lighthouse 실패: ${perfError.message}`);
-      // Windows EPERM 오류 추가 안내
-      if (perfError.message.includes('EPERM') || perfError.message.includes('Permission denied')) {
-        console.warn('💡 해결 방법: 관리자 권한으로 실행하거나 바이러스 백신을 일시 중지하세요.');
-      }
+      console.warn(`\n❌ 성능 측정 실패: ${perfError.message}`);
       performanceResults = { error: perfError.message }; // 명시적으로 오류 표시
     }
     

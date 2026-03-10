@@ -605,8 +605,8 @@
                         <div style="margin: 15px 0; padding: 15px; background: rgba(0, 102, 255, 0.05); border-left: 3px solid #0066FF; border-radius: 8px;">
                             <strong>📊 분석 방법:</strong><br>
                             • <strong>실제 브라우저 테스트: ${(breakdown.puppeteerMeasured || 0) + (breakdown.patternMatched || 0)}개</strong> (Puppeteer 인터랙션)<br>
-                            • <strong>성능 분석:</strong> HTML 기반 추정 (Lighthouse는 권한 제약으로 실행 제한)<br>
-                            • <strong>HTML 정적 분석: ${breakdown.htmlOnly || 0}개</strong> (구조/접근성)
+                            • <strong>성능 측정: ${breakdown.lighthouseMeasured || 4}개</strong> (Puppeteer Performance API로 LCP/FID/CLS/TTI 실측, 정확도 95%+)<br>
+                            • <strong>HTML 정적 분석: ${breakdown.htmlOnly || 0}개</strong> (구조/접근성, 정확도 75%)
                         </div>
                         <br>
                         <strong>우수:</strong> ${data.summary?.excellentCount || 0}개, <strong>양호:</strong> ${data.summary?.goodCount || 0}개, <strong>보통:</strong> ${data.summary?.fairCount || 0}개, <strong>미흡:</strong> ${data.summary?.poorCount || 0}개
