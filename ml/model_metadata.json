@@ -1,0 +1,40 @@
+{
+  "model_type": "RandomForestRegressor",
+  "training_data_size": 1617,
+  "features": [
+    "Q1",
+    "Q2",
+    "Q3",
+    "Q4",
+    "Q5",
+    "Q6",
+    "Q7",
+    "Q8",
+    "Q9",
+    "Q10"
+  ],
+  "target": "overall_avg",
+  "performance": {
+    "train_rmse": 0.0302,
+    "test_rmse": 0.0612,
+    "train_mae": 0.0227,
+    "test_mae": 0.0467,
+    "train_r2": 0.9946,
+    "test_r2": 0.9772,
+    "cv_r2_mean": 0.944,
+    "cv_r2_std": 0.0303,
+    "feature_importance": {
+      "Q1": 0.116,
+      "Q2": 0.119,
+      "Q3": 0.091,
+      "Q4": 0.032,
+      "Q5": 0.02,
+      "Q6": 0.04,
+      "Q7": 0.288,
+      "Q8": 0.147,
+      "Q9": 0.089,
+      "Q10": 0.058
+    }
+  },
+  "usage": "Q1~Q10 점수를 입력하면 예상 국민평가 점수(overall_avg)를 예측"
+}

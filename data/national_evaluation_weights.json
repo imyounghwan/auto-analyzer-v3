@@ -1,0 +1,121 @@
+{
+  "description": "1,617개 국민평가 데이터 기반 항목별 가중치 및 중요도",
+  "methodology": "Pearson 상관관계 분석 (Q1~Q10 vs overall_avg)",
+  "correlations": {
+    "Q1": {
+      "correlation": 0.79,
+      "p_value": 0.0,
+      "importance": 79.0
+    },
+    "Q2": {
+      "correlation": 0.783,
+      "p_value": 0.0,
+      "importance": 78.3
+    },
+    "Q3": {
+      "correlation": 0.76,
+      "p_value": 0.0,
+      "importance": 76.0
+    },
+    "Q4": {
+      "correlation": 0.719,
+      "p_value": 0.0,
+      "importance": 71.9
+    },
+    "Q5": {
+      "correlation": 0.71,
+      "p_value": 0.0,
+      "importance": 71.0
+    },
+    "Q6": {
+      "correlation": 0.762,
+      "p_value": 0.0,
+      "importance": 76.2
+    },
+    "Q7": {
+      "correlation": 0.806,
+      "p_value": 0.0,
+      "importance": 80.6
+    },
+    "Q8": {
+      "correlation": 0.793,
+      "p_value": 0.0,
+      "importance": 79.3
+    },
+    "Q9": {
+      "correlation": 0.788,
+      "p_value": 0.0,
+      "importance": 78.8
+    },
+    "Q10": {
+      "correlation": 0.761,
+      "p_value": 0.0,
+      "importance": 76.1
+    }
+  },
+  "weights": {
+    "Q1": 0.103,
+    "Q2": 0.102,
+    "Q3": 0.099,
+    "Q4": 0.094,
+    "Q5": 0.093,
+    "Q6": 0.099,
+    "Q7": 0.105,
+    "Q8": 0.103,
+    "Q9": 0.103,
+    "Q10": 0.099
+  },
+  "improvement_impacts": {
+    "Q7": {
+      "current_avg": 3.76,
+      "improvement": 0.111,
+      "new_score": 3.86
+    },
+    "Q8": {
+      "current_avg": 3.73,
+      "improvement": 0.111,
+      "new_score": 3.86
+    },
+    "Q1": {
+      "current_avg": 3.77,
+      "improvement": 0.073,
+      "new_score": 3.82
+    },
+    "Q9": {
+      "current_avg": 3.7,
+      "improvement": 0.114,
+      "new_score": 3.86
+    },
+    "Q2": {
+      "current_avg": 3.79,
+      "improvement": 0.073,
+      "new_score": 3.82
+    },
+    "Q6": {
+      "current_avg": 3.77,
+      "improvement": 0.074,
+      "new_score": 3.82
+    },
+    "Q10": {
+      "current_avg": 3.73,
+      "improvement": 0.113,
+      "new_score": 3.86
+    },
+    "Q3": {
+      "current_avg": 3.74,
+      "improvement": 0.074,
+      "new_score": 3.82
+    },
+    "Q4": {
+      "current_avg": 3.77,
+      "improvement": 0.075,
+      "new_score": 3.82
+    },
+    "Q5": {
+      "current_avg": 3.75,
+      "improvement": 0.074,
+      "new_score": 3.82
+    }
+  },
+  "usage": "Nielsen 항목 점수를 가중 평균하여 예상 국민평가 점수 계산"
+}

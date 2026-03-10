@@ -3,6 +3,7 @@ import { getItemDetails } from '../config/itemDetails.js';
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { predictFromNielsenScores } from '../ml/predictScore.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -21,10 +22,10 @@ try {
 }
 
 /**
- * Nielsen 26개 항목 점수 계산 (Puppeteer 통합 + 1,617개 국민평가 데이터 기반)
+ * Nielsen 26개 항목 점수 계산 (Puppeteer 통합 + 1,617개 국민평가 데이터 기반 + ML 예측)
  */
-export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
-  console.log('📊 Nielsen 점수 계산 중... (1,617개 국민평가 데이터 기반)');
+export async function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
+  console.log('📊 Nielsen 점수 계산 중... (1,617개 국민평가 데이터 기반 + ML 예측)');
   
   const { structure, accessibility } = htmlAnalysis;
   const { interaction = {}, performance = {} } = advancedMetrics;
@@ -192,6 +193,18 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
       : `국민평가 평균(${nationalBenchmark.national_average.종합_평균})보다 ${(nationalBenchmark.national_average.종합_평균 - totalScore).toFixed(2)}점 낮습니다 (개선 필요)`
   } : null;
 
+  // ML 모델 예측 (비동기)
+  let mlPrediction = null;
+  if (nationalMapping) {
+    try {
+      console.log('🤖 ML 모델로 예상 국민평가 점수 예측 중...');
+      mlPrediction = await predictFromNielsenScores(scores, nationalMapping);
+      console.log(`✅ ML 예측 완료: ${mlPrediction.predicted_score}/5.0 (${mlPrediction.grade})`);
+    } catch (error) {
+      console.warn(`⚠️ ML 예측 실패: ${error.message}`);
+    }
+  }
+
   return {
     scores: scoresWithDetails,
     summary: {
@@ -209,7 +222,8 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
         lighthouseMeasured,  // Lighthouse 성공 여부
         htmlOnly: lowCount
       },
-      nationalComparison  // 1,617개 국민평가 데이터 비교
+      nationalComparison,  // 1,617개 국민평가 데이터 비교
+      mlPrediction  // ML 예측 결과
     }
   };
 }

@@ -103,9 +103,9 @@ export async function runComprehensiveAnalysis(url, targetPages = null) {
     progressBar.update(85, { task: '📊 결과 통합 중...' });
     const mergedInteractionResults = mergePageResults(allPageResults);
     
-    // 6. Nielsen 점수 계산
-    progressBar.update(95, { task: '📊 Nielsen 점수 계산...' });
-    const nielsenResult = calculateNielsenScores(htmlAnalysis, {
+    // 6. Nielsen 점수 계산 (ML 예측 포함)
+    progressBar.update(95, { task: '📊 Nielsen 점수 계산 + ML 예측...' });
+    const nielsenResult = await calculateNielsenScores(htmlAnalysis, {
       interaction: mergedInteractionResults,
       performance: performanceResults
     });
