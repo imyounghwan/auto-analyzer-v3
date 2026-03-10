@@ -601,6 +601,18 @@
                         <p>종합 점수 <strong style="color: #0066FF; font-size: 24px;">${(data.summary?.totalScore || data.totalScore || 0).toFixed(2)}/5.0</strong> (등급: <strong style="color: #0066FF;">${grade}</strong>)을 기록했습니다.</p>
                         <p style="margin: 10px 0;"><small>✅ 실제 브라우저 분석 + AI 정적 분석 통합 평가</small></p>
                         <p style="margin: 10px 0;"><small>※ 1,617개 국민평가 데이터 기반 정밀 진단</small></p>
+                        
+                        ${data.summary?.nationalComparison ? `
+                        <div style="margin: 15px 0; padding: 15px; background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10b981; border-radius: 8px;">
+                            <strong>🎓 국민평가 비교 (49개 공공기관 기준):</strong><br>
+                            • <strong>내 점수: ${data.summary.nationalComparison.yourScore}/5.0</strong><br>
+                            • 국민평가 평균: ${data.summary.nationalComparison.nationalAverage}/5.0<br>
+                            • 차이: ${data.summary.nationalComparison.difference > 0 ? '+' : ''}${data.summary.nationalComparison.difference}점<br>
+                            • 상대적 위치: <strong>${data.summary.nationalComparison.percentile}</strong><br>
+                            • ${data.summary.nationalComparison.message}
+                        </div>
+                        ` : ''}
+                        
                         <br>
                         <div style="margin: 15px 0; padding: 15px; background: rgba(0, 102, 255, 0.05); border-left: 3px solid #0066FF; border-radius: 8px;">
                             <strong>📊 분석 방법:</strong><br>

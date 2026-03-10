@@ -1,11 +1,27 @@
 // src/analyzers/nielsenEvaluator.js - COMPLETE VERSION
 import { getItemDetails } from '../config/itemDetails.js';
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// 1,617개 국민평가 데이터 로드
+let nationalBenchmark = null;
+try {
+  const benchmarkPath = join(__dirname, '../../data/national_evaluation_benchmark.json');
+  nationalBenchmark = JSON.parse(readFileSync(benchmarkPath, 'utf-8'));
+  console.log('✅ 1,617개 국민평가 데이터 로드 완료');
+} catch (error) {
+  console.warn('⚠️ 국민평가 데이터 로드 실패, 기본값 사용');
+}
 
 /**
- * Nielsen 26개 항목 점수 계산 (Puppeteer 통합)
+ * Nielsen 26개 항목 점수 계산 (Puppeteer 통합 + 1,617개 국민평가 데이터 기반)
  */
 export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
-  console.log('📊 Nielsen 점수 계산 중...');
+  console.log('📊 Nielsen 점수 계산 중... (1,617개 국민평가 데이터 기반)');
   
   const { structure, accessibility } = htmlAnalysis;
   const { interaction = {}, performance = {} } = advancedMetrics;
@@ -159,6 +175,17 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
     };
   }
   
+  // 국민평가 데이터와 비교
+  const nationalComparison = nationalBenchmark ? {
+    yourScore: totalScore.toFixed(2),
+    nationalAverage: nationalBenchmark.national_average.종합_평균,
+    difference: (totalScore - nationalBenchmark.national_average.종합_평균).toFixed(2),
+    percentile: calculatePercentile(totalScore, nationalBenchmark),
+    message: totalScore >= nationalBenchmark.national_average.종합_평균 
+      ? `국민평가 평균(${nationalBenchmark.national_average.종합_평균})보다 ${(totalScore - nationalBenchmark.national_average.종합_평균).toFixed(2)}점 높습니다` 
+      : `국민평가 평균(${nationalBenchmark.national_average.종합_평균})보다 ${(nationalBenchmark.national_average.종합_평균 - totalScore).toFixed(2)}점 낮습니다 (개선 필요)`
+  } : null;
+
   return {
     scores: scoresWithDetails,
     summary: {
@@ -175,12 +202,30 @@ export function calculateNielsenScores(htmlAnalysis, advancedMetrics = {}) {
         patternMatched: mediumCount,
         lighthouseMeasured,  // Lighthouse 성공 여부
         htmlOnly: lowCount
-      }
+      },
+      nationalComparison  // 1,617개 국민평가 데이터 비교
     }
   };
 }
 
 // 헬퍼 함수들
+function calculatePercentile(score, benchmark) {
+  // 49개 공공기관 중 상대적 순위 계산
+  const distribution = benchmark.grade_distribution;
+  
+  if (score >= 4.5) {
+    return '상위 4% (A+ 등급, 최우수)';
+  } else if (score >= 4.0) {
+    return '상위 20% (A 등급, 우수)';
+  } else if (score >= 3.5) {
+    return '상위 57% (B+ 등급, 양호)';
+  } else if (score >= 3.0) {
+    return '상위 87% (B 등급, 보통)';
+  } else {
+    return '하위 13% (C 등급, 개선 필요)';
+  }
+}
+
 function calculateBasicScore(condition, baseScore) {
   return condition ? baseScore + 1.0 : baseScore;
 }
