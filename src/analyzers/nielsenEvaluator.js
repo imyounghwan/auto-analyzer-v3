@@ -41,22 +41,27 @@ export async function calculateNielsenScores(htmlAnalysis, advancedMetrics = {})
     N2_2_natural_flow: calculateNavigationScore(structure.links),
     
     // N3: 사용자 제어와 자유
-    N3_1_undo_redo: calculateBasicScore(structure.forms.count > 0, 3.0),
+    // N3_1: 폼이 없으면 null (점수 계산 제외)
+    N3_1_undo_redo: structure.forms.count > 0 ? calculateBasicScore(structure.forms.count > 0, 3.0) : null,
     N3_2_emergency_exit: interaction.N3_2_emergency_exit?.score || 3.5,
     N3_3_flexible_navigation: interaction.N3_3_flexible_navigation?.score || calculateNavigationScore(structure.links),
     
     // N4: 일관성과 표준
     N4_1_visual_consistency: 3.5,
-    N4_2_terminology_consistency: 3.5,
+    // N4_2: 측정 불가능한 항목 → null
+    N4_2_terminology_consistency: null,
     N4_3_standard_compliance: 4.0,
     
     // N5: 오류 방지
-    N5_1_input_validation: interaction.N5_1_input_validation?.score || calculateBasicScore(structure.forms.inputs > 0, 3.5),
-    N5_2_confirmation_dialog: 3.5,
-    N5_3_constraints: 3.5,
+    // N5_1: 폼이 없으면 null
+    N5_1_input_validation: structure.forms.inputs > 0 ? (interaction.N5_1_input_validation?.score || calculateBasicScore(structure.forms.inputs > 0, 3.5)) : null,
+    // N5_2, N5_3: 측정 불가능 → null
+    N5_2_confirmation_dialog: null,
+    N5_3_constraints: null,
     
     // N6: 인식보다 회상
-    N6_1_visible_options: 4.0,
+    // N6_1: 측정 불가능 → null
+    N6_1_visible_options: null,
     N6_2_recognition_cues: 3.5,
     N6_3_memory_load: calculateBasicScore(structure.navigation.hasBreadcrumb, 3.5),
     
@@ -71,35 +76,38 @@ export async function calculateNielsenScores(htmlAnalysis, advancedMetrics = {})
     N8_3_visual_hierarchy: calculateBasicScore(structure.headings.total > 5, 3.5),
     
     // N9: 오류 인식 및 복구
-    N9_1_error_messages: interaction.N9_1_error_messages?.score || 3.5,
-    N9_2_recovery_support: interaction.N9_2_recovery_support?.score || 3.0,
+    // N9_1, N9_2: 폼이 없으면 null
+    N9_1_error_messages: structure.forms.count > 0 ? (interaction.N9_1_error_messages?.score || 3.5) : null,
+    N9_2_recovery_support: structure.forms.count > 0 ? (interaction.N9_2_recovery_support?.score || 3.0) : null,
     
     // N10: 도움말과 문서
-    N10_1_help_visibility: 3.5,
+    // N10_1: 측정 불가능 → null
+    N10_1_help_visibility: null,
     N10_2_documentation: 3.5,
     
     // N11: 검색 기능
-    N11_1_search_autocomplete: interaction.N11_1_search_autocomplete?.score || 2.0,
-    N11_2_search_quality: interaction.N11_2_search_quality?.score || (interaction.N11_1_search_autocomplete?.hasSearch ? 3.5 : 2.0),
+    // N11_1, N11_2: 검색이 없으면 null
+    N11_1_search_autocomplete: (interaction.N11_1_search_autocomplete?.hasSearch) ? (interaction.N11_1_search_autocomplete?.score || 2.0) : null,
+    N11_2_search_quality: (interaction.N11_1_search_autocomplete?.hasSearch) ? (interaction.N11_2_search_quality?.score || 2.0) : null,
     
     // N12: 반응형 디자인
     N12_1_responsive_layout: 4.0,
     N12_2_touch_optimization: 3.5,
     
-    // N13: 콘텐츠 신선도
-    N13_content_freshness: 3.5,
+    // N13: 콘텐츠 신선도 - 측정 불가능 → null
+    N13_content_freshness: null,
     
     // N14: 접근성
     N14_1_color_contrast: 3.5,
     N14_2_keyboard_accessibility: calculateBasicScore(accessibility.skipNavigation || accessibility.ariaLabels > 5, 3.5),
     
-    // N15: 파일 다운로드
-    N15_file_download: 3.0,
+    // N15: 파일 다운로드 - 측정 불가능 → null
+    N15_file_download: null,
     
-    // N16: 폼 복잡도
-    N16_form_complexity: calculateFormComplexity(structure.forms),
+    // N16: 폼 복잡도 - 폼이 없으면 null
+    N16_form_complexity: structure.forms.count > 0 ? calculateFormComplexity(structure.forms) : null,
     
-    // N17: 성능 (Lighthouse 실측) - 실패 시 항목 제외
+    // N17: 성능 (Puppeteer Performance API 실측) - 실패 시 항목 제외
     ...(performance.error ? {} : {
       N17_1_lcp_performance: performance.lcp?.score || 3.0,
       N17_2_fid_responsiveness: performance.fid?.score || 3.0,
@@ -107,11 +115,11 @@ export async function calculateNielsenScores(htmlAnalysis, advancedMetrics = {})
       N17_4_tti_interactive: performance.tti?.score || 3.0
     }),
     
-    // N18: 다국어 지원
-    N18_multilingual: calculateBasicScore(accessibility.langAttribute, 2.5),
+    // N18: 다국어 지원 - 측정 불가능 → null
+    N18_multilingual: null,
     
-    // N19: 알림 시스템
-    N19_notification: 2.5,
+    // N19: 알림 시스템 - 측정 불가능 → null
+    N19_notification: null,
     
     // N20: 브랜딩
     N20_branding: calculateBrandingScore(structure)
@@ -133,12 +141,12 @@ export async function calculateNielsenScores(htmlAnalysis, advancedMetrics = {})
   if (interaction.N5_1_input_validation) accuracyMap.high_accuracy.push('N5_1');
   if (interaction.N9_1_error_messages) accuracyMap.high_accuracy.push('N9_1');
   
-  // Lighthouse 실측 항목 (98%+)
-  let lighthouseMeasured = 0;
+  // Puppeteer Performance API 실측 항목 (95%+)
+  let performanceMeasured = 0;
   // performance.error가 없고, 실제 측정값이 있을 때만 성공으로 판단
   if (!performance.error && (performance.lcp?.value > 0 || performance.lcp?.score > 0)) {
     accuracyMap.high_accuracy.push('N17_1', 'N17_2', 'N17_3', 'N17_4');
-    lighthouseMeasured = 4;  // Lighthouse 성공 시에만 4개로 설정
+    performanceMeasured = 4;  // 성능 측정 성공 시에만 4개로 설정
   }
   
   // 중간 정확도 (85-90%) - 정확한 키 이름 사용
@@ -147,13 +155,15 @@ export async function calculateNielsenScores(htmlAnalysis, advancedMetrics = {})
   if (interaction.N7_3_batch_operations) accuracyMap.medium_accuracy.push('N7_3');
   if (interaction.N9_2_recovery_support) accuracyMap.medium_accuracy.push('N9_2');
   
-  // 통계 계산
-  const scoreValues = Object.values(scores);
+  // 통계 계산 (null 값 제외)
+  const scoreValues = Object.values(scores).filter(s => s !== null);
   const totalScore = scoreValues.reduce((sum, s) => sum + s, 0) / scoreValues.length;
   const grade = totalScore >= 4.5 ? 'A+' : 
                 totalScore >= 4.0 ? 'A' : 
                 totalScore >= 3.5 ? 'B+' : 
                 totalScore >= 3.0 ? 'B' : 'C';
+  
+  console.log(`📊 평가 항목: 전체 ${Object.keys(scores).length}개 중 ${scoreValues.length}개 항목 적용 (${Object.keys(scores).length - scoreValues.length}개 제외)`);
   
   // 실측률 계산 (실제 측정한 항목의 비율)
   const highCount = accuracyMap.high_accuracy.length;
@@ -166,9 +176,11 @@ export async function calculateNielsenScores(htmlAnalysis, advancedMetrics = {})
   
   console.log(`✅ Nielsen 점수: ${totalScore.toFixed(2)}/5.0 (${grade}) | 실제 브라우저 분석 + AI 정적 분석`);
   
-  // 각 항목에 상세 정보 + 국민평가 비교 추가
+  // 각 항목에 상세 정보 + 국민평가 비교 추가 (null 제외)
   const scoresWithDetails = {};
   for (const [itemId, score] of Object.entries(scores)) {
+    if (score === null) continue;  // null 항목 제외
+    
     const details = getItemDetails(itemId);
     const nationalItemComparison = getNationalItemComparison(itemId, score);
     
@@ -217,9 +229,9 @@ export async function calculateNielsenScores(htmlAnalysis, advancedMetrics = {})
       poorCount: scoreValues.filter(s => s < 3.0).length,
       overallMeasuredRate: `${measuredRate}%`,
       accuracyBreakdown: {
-        puppeteerMeasured: highCount - lighthouseMeasured,  // Puppeteer만
+        puppeteerMeasured: highCount - performanceMeasured,  // Puppeteer 인터랙션만
         patternMatched: mediumCount,
-        lighthouseMeasured,  // Lighthouse 성공 여부
+        performanceMeasured,  // Puppeteer Performance API
         htmlOnly: lowCount
       },
       nationalComparison,  // 1,617개 국민평가 데이터 비교

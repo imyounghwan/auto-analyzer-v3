@@ -680,9 +680,22 @@
                 }
             }
             
-            // 편의성/디자인 분리 (임시로 처음 37개는 편의성, 나머지는 디자인)
-            const convenienceItems = items.slice(0, 37);
-            const designItems = items.slice(37);
+            // 디자인 항목 정의 (사용자 지정 9개)
+            const designItemIds = [
+                'N4_1_visual_consistency',      // 시각적 일관성
+                'N4_3_standard_compliance',     // 표준 준수
+                'N6_2_recognition_cues',        // 인식 단서
+                'N8_2_clean_interface',         // 깔끔한 인터페이스
+                'N8_3_visual_hierarchy',        // 시각적 계층
+                'N12_1_responsive_layout',      // 반응형 레이아웃
+                'N12_2_touch_optimization',     // 터치 최적화
+                'N14_1_color_contrast',         // 색상 대비
+                'N20_branding'                  // 브랜딩
+            ];
+            
+            // 편의성/디자인 분리 (정확한 ID 기준)
+            const convenienceItems = items.filter(item => !designItemIds.includes(item.itemId));
+            const designItems = items.filter(item => designItemIds.includes(item.itemId));
             
             const convenienceHTML = renderItems(convenienceItems, 'convenience');
             const designHTML = renderItems(designItems, 'design');
