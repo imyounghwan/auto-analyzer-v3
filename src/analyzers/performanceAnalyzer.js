@@ -7,10 +7,15 @@ import fs from 'fs';
 
 /**
  * Lighthouse Web Vitals 측정 (N17_1-4)
- * Windows EPERM 오류 해결: 커스텀 Temp 디렉토리 사용
+ * Windows EPERM 오류 해결: 환경변수로 Temp 폴더 완전 변경
  */
 export async function analyzeWebVitals(url) {
   let chrome;
+  
+  // 원본 환경변수 백업
+  const originalTmpDir = process.env.TMPDIR;
+  const originalTemp = process.env.TEMP;
+  const originalTmp = process.env.TMP;
   
   try {
     console.log('  ⚡ 성능 측정 중 (Lighthouse)...');
@@ -20,6 +25,11 @@ export async function analyzeWebVitals(url) {
     if (!fs.existsSync(customTmpDir)) {
       fs.mkdirSync(customTmpDir, { recursive: true });
     }
+    
+    // 환경변수를 커스텀 Temp 디렉토리로 변경 (Lighthouse가 이 경로 사용)
+    process.env.TMPDIR = customTmpDir;
+    process.env.TEMP = customTmpDir;
+    process.env.TMP = customTmpDir;
     
     // Chrome 실행 (커스텀 user-data-dir 사용)
     chrome = await chromeLauncher.launch({
@@ -84,14 +94,27 @@ export async function analyzeWebVitals(url) {
       } catch (e) {}
     }
     
-    // Fallback: 기본값
-    return {
-      lcp: { value: 0, score: 4.0, unit: 'ms' },
-      fid: { value: 0, score: 4.0, unit: 'ms' },
-      cls: { value: 0, score: 4.0, unit: 'score' },
-      tti: { value: 0, score: 4.0, unit: 'ms' },
-      accuracy: '0%',
-      error: error.message
-    };
+    // 환경변수 복원
+    if (originalTmpDir !== undefined) process.env.TMPDIR = originalTmpDir;
+    else delete process.env.TMPDIR;
+    
+    if (originalTemp !== undefined) process.env.TEMP = originalTemp;
+    else delete process.env.TEMP;
+    
+    if (originalTmp !== undefined) process.env.TMP = originalTmp;
+    else delete process.env.TMP;
+    
+    // 에러 정보 반환
+    throw error;
+  } finally {
+    // 환경변수 복원 (성공 시에도)
+    if (originalTmpDir !== undefined) process.env.TMPDIR = originalTmpDir;
+    else delete process.env.TMPDIR;
+    
+    if (originalTemp !== undefined) process.env.TEMP = originalTemp;
+    else delete process.env.TEMP;
+    
+    if (originalTmp !== undefined) process.env.TMP = originalTmp;
+    else delete process.env.TMP;
   }
 }
