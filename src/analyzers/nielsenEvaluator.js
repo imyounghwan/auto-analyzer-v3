@@ -203,7 +203,9 @@ export async function calculateNielsenScores(htmlAnalysis, advancedMetrics = {})
     try {
       console.log('🤖 ML 모델로 예상 국민평가 점수 예측 중...');
       mlPrediction = await predictFromNielsenScores(scores, nationalMapping);
-      console.log(`✅ ML 예측 완료: ${mlPrediction.predicted_score}/5.0 (${mlPrediction.grade})`);
+      if (mlPrediction) {
+        console.log(`✅ ML 예측 완료: ${mlPrediction.predicted_score}/5.0 (${mlPrediction.grade})`);
+      }
     } catch (error) {
       console.warn(`⚠️ ML 예측 실패: ${error.message}`);
     }

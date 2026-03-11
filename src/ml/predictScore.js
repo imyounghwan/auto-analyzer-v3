@@ -49,9 +49,18 @@ export async function predictNielsenScore(qScores) {
       stderr += data.toString();
     });
 
+    python.on('error', (error) => {
+      // Python 실행 실패 시 경고만 표시하고 null 반환
+      console.warn('⚠️  Python을 찾을 수 없어 ML 예측을 건너뜁니다.');
+      console.warn('   ML 예측 기능을 사용하려면 Python을 설치하세요:');
+      console.warn('   https://www.python.org/downloads/');
+      resolve(null);
+    });
+
     python.on('close', (code) => {
       if (code !== 0) {
-        reject(new Error(`Python 스크립트 실행 실패: ${stderr}`));
+        console.warn('⚠️  ML 예측 실패:', stderr);
+        resolve(null);
         return;
       }
 
@@ -59,7 +68,8 @@ export async function predictNielsenScore(qScores) {
         const result = JSON.parse(stdout);
         resolve(result);
       } catch (error) {
-        reject(new Error(`JSON 파싱 실패: ${error.message}\nOutput: ${stdout}`));
+        console.warn('⚠️  ML 예측 결과 파싱 실패:', error.message);
+        resolve(null);
       }
     });
   });
