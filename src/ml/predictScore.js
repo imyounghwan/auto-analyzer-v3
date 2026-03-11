@@ -36,10 +36,30 @@ export async function predictNielsenScore(qScores) {
     // Python 스크립트 실행 (Windows/Linux 호환)
     const scriptPath = join(__dirname, '../../scripts/predict_score.py');
     const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
-    const python = spawn(pythonCmd, [scriptPath, ...scores]);
+    
+    let python;
+    try {
+      python = spawn(pythonCmd, [scriptPath, ...scores]);
+    } catch (error) {
+      // Spawn 실패 시 즉시 경고 반환
+      console.warn('⚠️  Python을 찾을 수 없어 ML 예측을 건너뜁니다.');
+      console.warn('   ML 예측 기능을 사용하려면 Python을 설치하세요:');
+      console.warn('   https://www.python.org/downloads/');
+      resolve(null);
+      return;
+    }
 
     let stdout = '';
     let stderr = '';
+
+    // Error 핸들러를 spawn 직후 최우선으로 등록
+    python.on('error', (error) => {
+      // Python 실행 실패 시 경고만 표시하고 null 반환
+      console.warn('⚠️  Python을 찾을 수 없어 ML 예측을 건너뜁니다.');
+      console.warn('   ML 예측 기능을 사용하려면 Python을 설치하세요:');
+      console.warn('   https://www.python.org/downloads/');
+      resolve(null);
+    });
 
     python.stdout.on('data', (data) => {
       stdout += data.toString();
@@ -47,14 +67,6 @@ export async function predictNielsenScore(qScores) {
 
     python.stderr.on('data', (data) => {
       stderr += data.toString();
-    });
-
-    python.on('error', (error) => {
-      // Python 실행 실패 시 경고만 표시하고 null 반환
-      console.warn('⚠️  Python을 찾을 수 없어 ML 예측을 건너뜁니다.');
-      console.warn('   ML 예측 기능을 사용하려면 Python을 설치하세요:');
-      console.warn('   https://www.python.org/downloads/');
-      resolve(null);
     });
 
     python.on('close', (code) => {
