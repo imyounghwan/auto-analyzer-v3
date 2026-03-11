@@ -33,9 +33,10 @@ export async function predictNielsenScore(qScores) {
       scores.push(score.toString());
     }
 
-    // Python 스크립트 실행
+    // Python 스크립트 실행 (Windows/Linux 호환)
     const scriptPath = join(__dirname, '../../scripts/predict_score.py');
-    const python = spawn('python3', [scriptPath, ...scores]);
+    const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+    const python = spawn(pythonCmd, [scriptPath, ...scores]);
 
     let stdout = '';
     let stderr = '';
